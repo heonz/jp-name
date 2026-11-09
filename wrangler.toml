@@ -1,6 +1,11 @@
+# name 은 Cloudflare 대시보드의 Worker 이름과 똑같아야 해요.
 name = "jp-name"
-pages_build_output_dir = "public"
+main = "src/worker.js"
 compatibility_date = "2026-10-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
 
 [vars]
 MODEL = "claude-haiku-5-5"
