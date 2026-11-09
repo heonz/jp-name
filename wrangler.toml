@@ -1,0 +1,16 @@
+name = "jp-name"
+pages_build_output_dir = "public"
+compatibility_date = "2026-10-01"
+
+[vars]
+MODEL = "claude-haiku-5-5"
+DAILY_CALL_LIMIT = "30000"
+IP_LIMIT_PER_10MIN = "20"
+
+# ── 무료 플랜이면 아래는 그대로 주석으로 두세요. ──
+# 트래픽이 커져서 Workers 유료 플랜($5/월)으로 올리면 KV를 만들고 주석을 풀면
+# 속도 제한·하루 한도·전 세계 공용 캐시가 켜져요:
+#   npx wrangler kv namespace create NAMES
+# [[kv_namespaces]]
+# binding = "NAMES"
+# id = "여기에_KV_ID_붙여넣기"
