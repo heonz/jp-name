@@ -137,9 +137,8 @@ export async function onRequestPost({ request, env }) {
 
   if (!env.ANTHROPIC_API_KEY) return json({ error: "not_configured", fallback: true }, 503);
 
-  // 4) Claude 호출
-  let text = "";
-  try {
+  // 4) Claude 호출 — 이름이 3개 안 되면 한 번 더 물어봐서 채움
+  const ask = async (prompt) => {
     const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -150,18 +149,35 @@ export async function onRequestPost({ request, env }) {
       body: JSON.stringify({
         model: env.MODEL || "claude-haiku-5-5",
         max_tokens: 900,
-        messages: [{ role: "user", content: buildPrompt(sur, giv) }],
+        messages: [{ role: "user", content: prompt }],
       }),
     });
-    if (!r.ok) return json({ error: "upstream", status: r.status, fallback: true }, 502);
+    if (!r.ok) throw new Error("upstream " + r.status);
     const data = await r.json();
-    text = (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+    return (data.content || []).filter((c) => c.type === "text").map((c) => c.text).join("");
+  };
+
+  let result;
+  try {
+    result = validate(parseJSON(await ask(buildPrompt(sur, giv))), giv.length);
+    if (!result) result = validate(parseJSON(await ask(buildPrompt(sur, giv))), giv.length);
+    if (result && result.names.length < 3) {
+      const have = result.names.map((n) => n.surname_kana + " " + n.given_parts.join("")).join(", ");
+      const more = validate(parseJSON(await ask(buildPrompt(sur, giv) +
+        `\n\n이미 나온 이름: ${have}. 이것과 겹치지 않는 다른 읽기 조합으로 names를 3개 채워서 다시 출력해.`)), giv.length);
+      if (more) {
+        const seen = new Set(result.names.map((n) => n.surname_kana + n.given_parts.join("")));
+        for (const n of more.names) {
+          const k = n.surname_kana + n.given_parts.join("");
+          if (result.names.length < 3 && !seen.has(k)) { seen.add(k); result.names.push(n); }
+        }
+      }
+    }
   } catch (_) {
     return json({ error: "upstream", fallback: true }, 502);
   }
-
-  const result = validate(parseJSON(text), giv.length);
   if (!result) return json({ error: "invalid", fallback: true }, 502);
+  if (result.names.length < 3) return json({ ...result, cached: false }); // 3개 미만은 캐시하지 않음
 
   try {
     if (cache) {

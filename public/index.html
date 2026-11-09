@@ -7,11 +7,11 @@
 <meta name="description" content="내 이름 한자를 일본식으로 읽으면? 성은 그대로, 이름은 음독·훈독으로 지은 일본 이름 3가지를 추천해 드려요.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="내 이름, 일본에선 뭐라고 읽을까?">
-<meta property="og:description" content="내 이름 한자로 짓는 일본 이름. 하헌진 → 카와 켄신">
+<meta property="og:description" content="내 이름 한자로 짓는 일본 이름. 홍길동 → 코 요시토모">
 <meta property="og:image" content="/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23D2B282'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%232B1F12' font-family='serif'%3E名%3C/text%3E%3C/svg%3E">
-<!-- 광고 스크립트: 승인 후 여기에 붙여넣기 (예: AdSense <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script>) -->
+<!-- 애드센스 심사용 코드는 여기에 붙여넣기 (애드센스 화면에서 주는 <script async src="https://pagead2.googlesyndication.com/...">). 광고 단위 설정은 아래 스크립트의 ADS 항목에서 해요. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
@@ -20,8 +20,6 @@
 body{margin:0}
 img{max-width:100%}
 [hidden]{display:none!important}
-.ad{margin:0 auto;min-height:0;display:flex;justify-content:center}
-.ad:empty{display:none}
 
 /* Layout: a single column "registry office" — form on top, a wooden 表札 (doorplate) for the top pick, ledger rows for runners-up */
 :root{
@@ -40,7 +38,7 @@ img{max-width:100%}
   --wood:#D6B987; --wood-2:#C29E6A; --wood-ink:#24190D; --wood-edge:#9C7A47;
   --shu:#E2564A; --indigo:#8FA9DA; --chip:#2A2F3A; color-scheme:dark }
 
-body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;word-break:keep-all;overflow-wrap:break-word}
 .wrap{max-width:940px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:36px 72px;display:flex;flex-direction:column;gap:28px}
 header{display:flex;flex-direction:column;gap:8px}
 .eyebrow{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:500}
@@ -103,6 +101,7 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .runner .r1{font-weight:600;font-size:17px}
 .runner .r1 span{color:var(--muted);font-weight:500;margin-left:6px}
 .runner .meaning,.runner .vibe{font-size:13px}
+.pick-hint{margin:0;font-size:13px;color:var(--muted)}
 
 .thinking{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .brush{font:800 34px var(--f-display);color:var(--shu);animation:pulse 1.4s ease-in-out infinite}
@@ -118,6 +117,19 @@ footer a{color:inherit}
 .sheet img{border-radius:6px;border:1px solid var(--line);width:100%;height:auto}
 .sheet .row{display:flex;flex-wrap:wrap;gap:8px}
 .sheet p{margin:0;font-size:12px;color:var(--muted)}
+.ad-slot{display:flex;flex-direction:column;align-items:center;gap:4px;padding-block:8px}
+.ad-label{font-size:11px;letter-spacing:.12em;color:var(--muted)}
+.ad-box{display:flex;justify-content:center;align-items:center;max-width:100%;overflow:hidden}
+.ad-preview .ad-box{border:1.5px dashed var(--muted);border-radius:6px;color:var(--muted);font-size:13px;background:repeating-linear-gradient(45deg,transparent 0 10px,var(--chip) 10px 20px)}
+.runner .act{display:flex;flex-direction:column;gap:6px}
+.btn.kakao{background:#FEE500;color:#191600;border-color:#FEE500}
+.sns{display:flex;flex-wrap:wrap;gap:6px}
+.sns a,.sns button{font:500 13px var(--f-body);color:var(--ink);background:var(--chip);border:0;border-radius:99px;padding:6px 12px;text-decoration:none;cursor:pointer}
+.sns a:focus-visible,.sns button:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.inapp{font-size:12px;color:var(--ink);background:var(--paper);border-radius:6px;padding:8px 10px}
+.inapp button{font:600 12px var(--f-body);color:var(--indigo);background:none;border:0;padding:0;text-decoration:underline;cursor:pointer}
+.top .acts{display:flex;flex-wrap:wrap;gap:8px}
+@media (max-width:640px){.top .acts{justify-content:center}}
 
 @media (max-width:640px){
   .fields{grid-template-columns:1fr}
@@ -146,17 +158,17 @@ footer a{color:inherit}
     <div class="fields">
       <div class="field">
         <label for="f-sur">성</label>
-        <input id="f-sur" list="dl-sur" placeholder="물 하" value="물 하">
+        <input id="f-sur" list="dl-sur" placeholder="성 홍">
         <div class="hint" id="h-sur"></div>
       </div>
       <div class="field">
         <label for="f-g1">이름 첫 글자</label>
-        <input id="f-g1" list="dl-giv" placeholder="법 헌" value="법 헌">
+        <input id="f-g1" list="dl-giv" placeholder="길할 길">
         <div class="hint" id="h-g1"></div>
       </div>
       <div class="field">
         <label for="f-g2">이름 둘째 글자 (외자면 비우기)</label>
-        <input id="f-g2" list="dl-giv" placeholder="나루 진" value="나루 진">
+        <input id="f-g2" list="dl-giv" placeholder="한가지 동">
         <div class="hint" id="h-g2"></div>
       </div>
     </div>
@@ -165,22 +177,26 @@ footer a{color:inherit}
       <div class="status"><span class="dot on" id="dot"></span><span id="status-text">AI 작명</span></div>
     </div>
     <div class="example-row">다른 예시로 해보기
-      <button type="button" data-ex="쇠 김|백성 민|준걸 준">김민준</button>
-      <button type="button" data-ex="오얏 리|맑을 아|이로울 리">이아리</button>
-      <button type="button" data-ex="성 박|밝을 철|">박철</button>
-      <button type="button" data-ex="높을 최|슬기 지|은혜 혜">최지혜</button>
+      <button type="button" data-ex="수풀 림|빼어날 수|참 진">임수진</button>
+      <button type="button" data-ex="성 윤|슬기 지|넓을 호">윤지호</button>
+      <button type="button" data-ex="납 신|은혜 혜|참 진">신혜진</button>
+      <button type="button" data-ex="쇠 김|슬기 지|꽃부리 영">김지영</button>
     </div>
     <datalist id="dl-sur"></datalist>
     <datalist id="dl-giv"></datalist>
   </form>
 
-  <section class="results" id="results" aria-live="polite"></section>
+  <section class="results" id="results" aria-live="polite">
+    <div class="results" id="res-main"></div>
+    <!-- 광고 자리 A: 1순위 이름 바로 아래 (가장 많이 보이는 자리) -->
+    <aside class="ad-slot" id="ad-mid" data-slot="mid" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
+    <div class="results" id="res-rest"></div>
+  </section>
 
-  <!-- 광고 자리 1: 결과 바로 아래 (가장 많이 보이는 자리) -->
-  <div class="ad" id="ad-1"></div>
 
-  <!-- 광고 자리 2: 페이지 하단 -->
-  <div class="ad" id="ad-2"></div>
+
+  <!-- 광고 자리 B: 페이지 하단 -->
+  <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
   <footer>한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
@@ -189,12 +205,21 @@ footer a{color:inherit}
   <div class="sheet" role="dialog" aria-label="공유 카드">
     <img id="share-img" alt="일본 이름 공유 카드">
     <div class="row">
+      <button class="btn kakao" id="kakao-btn" type="button" hidden>카카오톡 공유</button>
       <button class="btn" id="native-share" type="button" hidden>공유하기</button>
       <button class="btn" id="save-btn" type="button">이미지 저장</button>
-      <button class="btn ghost" id="copy-btn" type="button">문구 복사</button>
-      <button class="btn ghost" id="close-btn" type="button">닫기</button>
+    </div>
+    <div class="sns" aria-label="다른 곳에 공유">
+      <a id="sns-x" target="_blank" rel="noopener">X</a>
+      <a id="sns-threads" target="_blank" rel="noopener">스레드</a>
+      <a id="sns-fb" target="_blank" rel="noopener">페이스북</a>
+      <a id="sns-line" target="_blank" rel="noopener">라인</a>
+      <button id="copy-link" type="button">링크 복사</button>
+      <button id="copy-btn" type="button">문구 복사</button>
     </div>
     <p id="share-msg">휴대폰에서는 이미지를 길게 눌러 저장할 수도 있어요.</p>
+    <div class="inapp" id="inapp" hidden>카카오톡·인스타 안의 브라우저에서는 저장 버튼이 안 될 수 있어요. 이미지를 길게 눌러 저장하거나 <button id="open-ext" type="button">외부 브라우저로 열기</button></div>
+    <button class="btn ghost" id="close-btn" type="button">닫기</button>
   </div>
 </div>
 
@@ -552,6 +577,8 @@ const GIV_RAW = `民|백성 민|みん|たみ
 侑|권할 유|ゆう|
 多|많을 다|た|かず
 旦|아침 단|たん|あさ
+同|한가지 동|どう|とも
+童|아이 동|どう|わらべ
 嘉|아름다울 가|か|よし
 佳|아름다울 가|か|よし
 雲|구름 운|うん|くも
@@ -570,6 +597,8 @@ function hunOf(kr){const p=kr.trim().split(/\s+/);return p.slice(0,-1).join(' ')
 function hasBatchim(s){const ch=s[s.length-1];const c=ch.charCodeAt(0)-0xAC00;return c>=0&&c<=11171&&c%28!==0}
 const josa=(w,a,b)=>hasBatchim(w)?b:a;
 const HAN=/\p{Script=Han}/u;
+// 성과 이름 첫 글자에 두음법칙 적용 (림→임, 리→이)
+const kName=parts=>parts.map((c,i)=>i<2&&c?dueum(c):c).join('');
 
 /* ---------- Resolve an input field ---------- */
 function resolve(text,dict){
@@ -647,6 +676,7 @@ function offlineNames(sur,giv){
   const chosen=[],seen=new Set(),gcount={};
   for(const o of out){const key=o.sk+'|'+o.parts.join('');const g=o.parts.join('');
     if(seen.has(key)||(gcount[g]||0)>=2)continue;seen.add(key);gcount[g]=(gcount[g]||0)+1;chosen.push(o);if(chosen.length===3)break}
+  for(const o of out){if(chosen.length>=3)break;const key=o.sk+'|'+o.parts.join('');if(!seen.has(key)){seen.add(key);chosen.push(o)}}
   return chosen.map(o=>{
     const gt=o.types.map(typeLabel).join('+');
     const kind=o.types.length===1?'one':o.types.every(t=>t==='on')?'oo':o.types.every(t=>t==='kun')?'kk':'mx';
@@ -673,7 +703,8 @@ function validAI(d,n){
 /* ---------- Rendering ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let current=null;
+let current=null,pendingPick=null;
+{const pp=new URLSearchParams(location.search).get('p');if(pp!==null&&/^[0-2]$/.test(pp))pendingPick=+pp;}
 
 function nameView(res,n){
   const sr=conv(n.sk),gr=conv(n.parts.join(''));
@@ -685,44 +716,51 @@ function rubyHTML(res,n){
   return s+`<span>${g}</span>`;
 }
 function render(res){
-  current=res;const box=$('#results');
-  const kname=res.kname;
+  current=res;if(typeof res.sel!=='number')res.sel=0;
+  if(res.source!=='example'&&pendingPick!==null){if(pendingPick<res.names.length)res.sel=pendingPick;pendingPick=null}
+  const kname=res.kname,sel=res.sel;
   const src=res.source==='ai'?'<span class="tag ai">AI 작명</span>':res.source==='dict'?'<span class="tag">사전 규칙 작명</span>':'<span class="tag">예시</span>';
   let html=`<div class="res-head"><h2>${esc(kname)} → 일본 이름</h2>${src}</div>`;
   if(res.notes&&res.notes.length)html+=res.notes.map(x=>`<div class="note">${x}</div>`).join('');
-  const [a,...rest]=res.names;const va=nameView(res,a);
+  const a=res.names[sel];const va=nameView(res,a);
+  const label=sel===0?'강력 추천 · 1순위':`내가 고른 이름 · 추천 ${sel+1}순위`;
   html+=`<article class="top">
-    <div class="stamp" aria-hidden="true">推し</div>
+    <div class="stamp" aria-hidden="true">${sel===0?'推し':'本命'}</div>
     <div class="plate"><div class="v" lang="ja">${rubyHTML(res,a)}</div></div>
     <div class="info">
-      <div class="rank-line">강력 추천 · 1순위</div>
+      <div class="rank-line">${label}</div>
       <p class="roma">${esc(va.roma)}</p>
       <p class="hangul">${esc(va.hangul)}</p>
       <div class="chips"><span class="chip">성 <b>${esc(a.sk)}</b> ${esc(a.stype)}</span><span class="chip">이름 <b>${esc(a.parts.join('·'))}</b> ${esc(a.gtype)}</span></div>
       <p class="meaning">${esc(a.meaning)}</p>
       <p class="vibe">${esc(a.vibe)}</p>
-      <div><button class="btn small" type="button" data-share="0">공유 카드 만들기</button></div>
+      <div class="acts"><button class="btn small kakao" type="button" data-kakao="${sel}" ${kakaoReady?'':'hidden'}>카톡으로 보내기</button><button class="btn small" type="button" data-share="${sel}">공유 카드 만들기</button></div>
     </div></article>`;
-  rest.forEach((n,i)=>{const v=nameView(res,n);html+=`<article class="runner">
-    <div class="num">${i+2}</div>
+  if(res.names.length>1)html+=`<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>`;
+  $('#res-main').innerHTML=html;
+  let rest='';
+  res.names.forEach((n,i)=>{if(i===sel)return;const v=nameView(res,n);rest+=`<article class="runner">
+    <div class="num">${i+1}</div>
     <div class="mini" lang="ja">${rubyHTML(res,n)}</div>
     <div class="txt"><div class="r1">${esc(v.roma)}<span>${esc(v.hangul)}</span></div>
       <div class="chips"><span class="chip">성 ${esc(n.stype)}</span><span class="chip">이름 ${esc(n.gtype)}</span></div>
       <p class="meaning">${esc(n.meaning)}</p><p class="vibe">${esc(n.vibe)}</p></div>
-    <div class="act"><button class="btn small ghost" type="button" data-share="${i+1}">공유 카드</button></div></article>`});
-  box.innerHTML=html;
+    <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
+  $('#res-rest').innerHTML=rest;
+  adsVisible(true);
 }
 function showThinking(){
-  $('#results').innerHTML=`<div class="thinking"><span class="brush" lang="ja">命名中</span><div><div style="font-weight:600">한자 읽기를 고르는 중이에요</div><div class="status">보통 몇 초면 끝나요</div></div><button class="btn small ghost" type="button" id="stop">멈추기</button></div>`;
+  adsVisible(false);$('#res-rest').innerHTML='';
+  $('#res-main').innerHTML=`<div class="thinking"><span class="brush" lang="ja">命名中</span><div><div style="font-weight:600">한자 읽기를 고르는 중이에요</div><div class="status">보통 몇 초면 끝나요</div></div><button class="btn small ghost" type="button" id="stop">멈추기</button></div>`;
   $('#stop').onclick=()=>currentCtl&&currentCtl.abort();
 }
-function showError(msg){$('#results').innerHTML=`<p class="err">${esc(msg)}</p>`}
+function showError(msg){adsVisible(false);$('#res-rest').innerHTML='';$('#res-main').innerHTML=`<p class="err">${esc(msg)}</p>`}
 
 /* ---------- Example (preloaded) ---------- */
-const EXAMPLE={source:'example',kname:'하헌진',sur:{kanji:'河',kr:'물 하'},giv:[{kanji:'憲',kr:'법 헌'},{kanji:'津',kr:'나루 진'}],notes:[],names:[
-  {sk:'かわ',stype:'훈독',parts:['けん','しん'],gtype:'음독+음독',meaning:'법(憲)을 지키는 나루터(津)의 사람. 소리 그대로 읽어 단단하게 울리는 이름이에요.',vibe:'막부 말기 떠돌이 검객'},
-  {sk:'か',stype:'음독',parts:['けん','しん'],gtype:'음독+음독',meaning:'성까지 음독으로 읽어 짧고 날카로운 느낌. 무사 이름 같은 무게감이 있어요.',vibe:'전국시대 이름 없는 군사'},
-  {sk:'かわ',stype:'훈독',parts:['のり','つ'],gtype:'이름읽기+훈독',meaning:'憲을 이름용 읽기 노리, 津을 훈독 츠로 읽은 희귀한 조합이에요.',vibe:'교토 골목 찻집 주인'}]};
+const EXAMPLE={source:'example',kname:'홍길동',sur:{kanji:'洪',kr:'성 홍'},giv:[{kanji:'吉',kr:'길할 길'},{kanji:'同',kr:'한가지 동'}],notes:[],names:[
+  {sk:'こう',stype:'음독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'길한(吉) 일을 함께(同) 나누는 사람. 요시토모는 일본 무사 이름에도 있는 울림이에요.',vibe:'전국시대 떠돌이 무사'},
+  {sk:'こう',stype:'음독',parts:['きち','どう'],gtype:'음독+음독',meaning:'두 글자를 소리 그대로 읽어 옛 이야기 속 인물 같은 이름이 됐어요.',vibe:'에도 시대 의적 두목'},
+  {sk:'おおみず',stype:'훈독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'洪을 큰물이라는 뜻의 훈독 오미즈로 읽은 버전. 성부터 스케일이 커요.',vibe:'홍수도 막아내는 마을 영웅'}]};
 
 /* ---------- Submit ---------- */
 function updateHints(){
@@ -743,7 +781,7 @@ async function submit(e){
   const allLocal=sur.entry&&giv.every(g=>g.entry);
   const notes=[];
   [sur,...giv].forEach((x,idx)=>{if(x.guessed&&x.alts.length){notes.push(`<span>「${esc(x.raw)}」은 <b lang="ja">${esc(x.kanji)}</b>(${esc(x.kr)})로 읽었어요. 다른 글자라면:</span>`+x.alts.map(a=>`<button type="button" data-fix="${idx}" data-val="${esc(a.kr)}" lang="ja" title="${esc(a.kr)}">${esc(a.jp)}</button>`).join(''))}});
-  const kn=[sur,...giv].map(x=>x.kr?eumOf(x.kr):(x.raw.match(HAN)?x.raw:eumOf(x.raw))).join('');
+  const kn=kName([sur,...giv].map(x=>x.kr?eumOf(x.kr):(x.raw.match(HAN)?x.raw:eumOf(x.raw))));
 
   if(aiOK){
     showThinking();$('#go').disabled=true;currentCtl=new AbortController();
@@ -755,10 +793,12 @@ async function submit(e){
       d.names=(d.names||[]);
       const names=validAI(d,giv.length);
       if(!names)throw {code:'invalid_json'};
+      if(names.length<3&&allLocal){const seen=new Set(names.map(n=>n.sk+'|'+n.parts.join('')));
+        for(const n of offlineNames(sur,giv)){if(names.length>=3)break;const k=n.sk+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
       const fix=(x,a)=>({kanji:(a&&a.kanji&&HAN.test(a.kanji))?a.kanji:x.kanji,kr:(a&&a.kr)||x.kr});
       const rs=fix(sur,d.surname),rg=giv.map((g,i)=>fix(g,d.given&&d.given[i]));
       if(d.note)notes.push(esc(d.note));
-      const kn2=[rs,...rg].map((x,i)=>x.kr?eumOf(x.kr):kn[i]).join('');
+      const kn2=kName([rs,...rg].map((x,i)=>x.kr?eumOf(x.kr):[...kn][i]));
       render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});setShareURL(rs.kanji,rg.map(x=>x.kanji).join(''));
       return;
     }catch(err){
@@ -817,13 +857,19 @@ async function makeCard(n){
   x.textAlign='left';x.fillStyle='#5B6272';x.font=`400 26px ${body}`;x.fillText(`${location.host} · 재미로 보세요`,90,1250);
   return cv;
 }
-let shareBlob=null,shareName=null,shareText='';
+let shareBlob=null,shareName=null,shareText='',shareIdx=0;
 async function openShare(i){
   const n=current.names[i];const v=nameView(current,n);
   $('#share-msg').textContent='휴대폰에서는 이미지를 길게 눌러 저장할 수도 있어요.';
   const cv=await makeCard(n);$('#share-img').src=cv.toDataURL('image/png');
   shareBlob=await new Promise(r=>cv.toBlob(r,'image/png'));shareName=`japanese-name-${v.roma.replace(/\s+/g,'-')}.png`;
-  shareText=`내 일본 이름은 ${v.kanji}(${v.kana}), ${v.hangul}! 캐릭터 설정: ${n.vibe}\n너도 해봐 → ${location.origin}/`;
+  shareIdx=i;shareText=`내 일본 이름은 ${v.kanji}(${v.kana}), ${v.hangul}! 캐릭터 설정: ${n.vibe}`;
+  const url=shareURL(),t=shareText;
+  $('#sns-x').href='https://x.com/intent/post?text='+encodeURIComponent(t)+'&url='+encodeURIComponent(url);
+  $('#sns-threads').href='https://www.threads.net/intent/post?text='+encodeURIComponent(t+'\n'+url);
+  $('#sns-fb').href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url);
+  $('#sns-line').href='https://social-plugins.line.me/lineit/share?url='+encodeURIComponent(url);
+  $('#kakao-btn').hidden=!kakaoReady;$('#inapp').hidden=!IN_APP;
   $('#native-share').hidden=!navigator.share;$('#modal').hidden=false;$('#close-btn').focus();
 }
 $('#save-btn').onclick=()=>{
@@ -836,30 +882,92 @@ $('#native-share').onclick=async()=>{
     else await navigator.share({text:shareText,url:location.origin+'/'});
   }catch(e){if(e&&e.name!=='AbortError')$('#share-msg').textContent='공유를 열지 못했어요. 이미지 저장 후 직접 올려 주세요.'}
 };
-$('#copy-btn').onclick=async()=>{
-  try{await navigator.clipboard.writeText(shareText);$('#share-msg').textContent='문구를 복사했어요.'}
-  catch(_){$('#share-msg').textContent=shareText}
-};
+async function copyText(t,ok){try{await navigator.clipboard.writeText(t);$('#share-msg').textContent=ok}catch(_){$('#share-msg').textContent=t}}
+$('#copy-btn').onclick=()=>copyText(shareText+'\n너도 해봐 → '+shareURL(),'문구를 복사했어요. 원하는 곳에 붙여넣기 하세요.');
+$('#copy-link').onclick=()=>copyText(shareURL(),'링크를 복사했어요.');
+$('#kakao-btn').onclick=()=>kakaoShare(shareIdx);
+$('#open-ext').onclick=()=>{const u=location.href;if(/KAKAOTALK/i.test(navigator.userAgent))location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(u);else copyText(u,'주소를 복사했어요. 크롬이나 사파리에 붙여넣어 열어 주세요.')};
 $('#close-btn').onclick=()=>{$('#modal').hidden=true};
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').hidden=true});
 
+/* ---------- Share helpers ---------- */
+// ▼ 카카오 개발자 콘솔의 JavaScript 키를 넣으면 카카오톡 공유 버튼이 켜져요.
+const KAKAO_JS_KEY='';
+const KAKAO_SDK='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js';
+const IN_APP=/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|everytimeApp/i.test(navigator.userAgent);
+let kakaoReady=false;
+function shareURL(){
+  if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));if(current.sel)u.searchParams.set('p',String(current.sel));return u.toString()}
+  return location.origin+'/';
+}
+function kakaoShare(i){
+  if(!kakaoReady||!window.Kakao)return;
+  const n=current.names[i];const v=nameView(current,n);const url=shareURL();
+  try{
+    Kakao.Share.sendDefault({objectType:'feed',
+      content:{title:`내 일본 이름은 ${v.hangul}`,description:`${v.kanji} (${v.kana}) · ${n.vibe}`,imageUrl:location.origin+'/og.png',link:{mobileWebUrl:url,webUrl:url}},
+      buttons:[{title:'결과 보기',link:{mobileWebUrl:url,webUrl:url}},{title:'내 이름도 해보기',link:{mobileWebUrl:location.origin+'/',webUrl:location.origin+'/'}}]});
+  }catch(e){$('#share-msg')&&($('#share-msg').textContent='카카오톡 공유를 열지 못했어요. 링크 복사를 써 주세요.')}
+}
+if(KAKAO_JS_KEY){
+  const sc=document.createElement('script');sc.src=KAKAO_SDK;sc.crossOrigin='anonymous';sc.async=true;
+  sc.onload=()=>{try{if(!Kakao.isInitialized())Kakao.init(KAKAO_JS_KEY);kakaoReady=Kakao.isInitialized();if(kakaoReady&&current)render(current)}catch(_){}};
+  document.head.appendChild(sc);
+}
+
+/* ---------- Ads ---------- */
+// ▼ 광고 승인 후 여기만 채우면 돼요. 주소 끝에 ?adpreview 를 붙이면 광고 자리를 미리 볼 수 있어요.
+const ADS={
+  provider:'',            // 'adfit' (카카오 애드핏) 또는 'adsense' (구글 애드센스)
+  adsenseClient:'',       // 애드센스: 'ca-pub-0000000000000000' (심사 중에도 이것만 넣어 두면 돼요)
+  slots:{
+    mid:   {pc:[728,90], mobile:[300,250], adfitPC:'', adfitMobile:'', adsenseSlot:''},  // 1순위 이름 아래
+    bottom:{pc:[728,90], mobile:[320,100], adfitPC:'', adfitMobile:'', adsenseSlot:''}   // 페이지 하단
+  }
+};
+const AD_PREVIEW=new URLSearchParams(location.search).has('adpreview');
+let adsReady=false;
+function loadScriptOnce(src,attrs){if(document.querySelector(`script[src="${src}"]`))return;const sc=document.createElement('script');sc.src=src;sc.async=true;Object.assign(sc,attrs||{});document.head.appendChild(sc)}
+function initAds(){
+  const mobile=window.innerWidth<768;
+  if(ADS.provider==='adsense'&&ADS.adsenseClient)loadScriptOnce('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client='+ADS.adsenseClient,{crossOrigin:'anonymous'});
+  document.querySelectorAll('.ad-slot').forEach(el=>{
+    const cfg=ADS.slots[el.dataset.slot];const box=el.querySelector('.ad-box');if(!cfg)return;
+    const [w,h]=mobile?cfg.mobile:cfg.pc;
+    if(AD_PREVIEW){el.classList.add('ad-preview');box.style.width=w+'px';box.style.height=h+'px';box.textContent=`광고 자리 ${el.dataset.slot==='mid'?'A':'B'} · ${w}×${h}`;el.dataset.on='1';return}
+    if(ADS.provider==='adfit'){const unit=mobile?cfg.adfitMobile:cfg.adfitPC;if(!unit)return;
+      box.style.minHeight=h+'px';box.innerHTML=`<ins class="kakao_ad_area" style="display:none" data-ad-unit="${esc(unit)}" data-ad-width="${w}" data-ad-height="${h}"></ins>`;el.dataset.on='1';
+      loadScriptOnce('https://t1.daumcdn.net/kas/static/ba.min.js');return}
+    if(ADS.provider==='adsense'&&ADS.adsenseClient&&cfg.adsenseSlot){
+      box.style.width='100%';box.style.minHeight=h+'px';
+      box.innerHTML=`<ins class="adsbygoogle" style="display:block;width:100%" data-ad-client="${esc(ADS.adsenseClient)}" data-ad-slot="${esc(cfg.adsenseSlot)}" data-ad-format="auto" data-full-width-responsive="true"></ins>`;el.dataset.on='1';
+      try{(window.adsbygoogle=window.adsbygoogle||[]).push({})}catch(_){}}
+  });
+  adsReady=true;adsVisible(true);
+}
+function adsVisible(show){document.querySelectorAll('.ad-slot').forEach(el=>{el.hidden=!(el.dataset.on==='1'&&(show||el.id==='ad-bottom'))})}
+
 /* ---------- Wiring ---------- */
+let aiState='on';
 function setStatus(s){aiState=s;const dot=$('#dot');dot.className='dot '+(s==='on'?'on':s==='off'?'off':'');
   $('#status-text').textContent=s==='on'?'AI 작명':'사전 모드 · 내장 사전과 규칙으로 지어요';updateHints()}
 $('#form').addEventListener('submit',submit);
 ['f-sur','f-g1','f-g2'].forEach(id=>$('#'+id).addEventListener('input',updateHints));
 $('#results').addEventListener('click',e=>{
   const s=e.target.closest('[data-share]');if(s){openShare(+s.dataset.share);return}
+  const k=e.target.closest('[data-kakao]');if(k){kakaoShare(+k.dataset.kakao);return}
+  const pk=e.target.closest('[data-pick]');if(pk&&current){current.sel=+pk.dataset.pick;render(current);if(current.source!=='example')setShareURL(current.sur.kanji,current.giv.map(g=>g.kanji).join(''));$('#res-main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
   const f=e.target.closest('[data-fix]');if(f){const ids=['f-sur','f-g1','f-g2'];const idx=+f.dataset.fix;$('#'+ids[idx]).value=f.dataset.val;updateHints();submit()}
 });
 document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
 $('#dl-sur').innerHTML=SUR.map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
 $('#dl-giv').innerHTML=GIV.filter(d=>d.c===d.jp||!GIV.some(o=>o!==d&&o.c===d.jp)).map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
 try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||''}}catch(_){}
+initAds();
 render(EXAMPLE);updateHints();
 
-function setShareURL(sk,gk){try{const u=new URL(location.href);u.searchParams.set('s',sk);u.searchParams.set('g',gk);history.replaceState(null,'',u)}catch(_){}}
+function setShareURL(sk,gk){try{const u=new URL(location.href);u.searchParams.set('s',sk);u.searchParams.set('g',gk);if(current&&current.sel)u.searchParams.set('p',String(current.sel));else u.searchParams.delete('p');history.replaceState(null,'',u)}catch(_){}}
 setStatus('on');
 (()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g');
   if(sk&&gk&&HAN.test(sk)){const gs=[...gk].filter(c=>HAN.test(c)).slice(0,2);$('#f-sur').value=[...sk][0];$('#f-g1').value=gs[0]||'';$('#f-g2').value=gs[1]||'';updateHints();submit()}})();
