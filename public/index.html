@@ -234,7 +234,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v10</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v11</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -1070,17 +1070,22 @@ const KAKAO_JS_KEY=location.hostname.endsWith('.workers.dev')?'89dc160f63a3f54fc
 const KAKAO_SDK='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js';
 const IN_APP=/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|everytimeApp/i.test(navigator.userAgent);
 let kakaoReady=false;
-function shareURL(){
-  if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));if(current.sel)u.searchParams.set('p',String(current.sel));if(current.packed)u.searchParams.set('r',current.packed);return u.toString()}
+function shareURL(short,idx){
+  if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));
+    if(short){const pk=(current.packedEach||[])[idx??(current.sel||0)];if(pk)u.searchParams.set('r',pk)}
+    else{if(current.sel)u.searchParams.set('p',String(current.sel));if(current.packed)u.searchParams.set('r',current.packed)}
+    return u.toString()}
   return location.origin+'/';
 }
 function kakaoShare(i){
   if(!kakaoReady||!window.Kakao){systemShare(i);return}
-  const n=current.names[i];const v=nameView(current,n);const url=shareURL();
+  const n=current.names[i];const v=nameView(current,n);
+  // 카톡 모바일은 메시지 크기 제한(10K)이 있어서 고른 이름 하나만 담은 짧은 링크를 써요
+  const url=shareURL(true,i);
   try{
     Kakao.Share.sendDefault({objectType:'feed',
       content:{title:`내 일본 이름은 ${v.hangul}`,description:`${v.kanji} (${v.kana}) · ${n.vibe}`,imageUrl:location.origin+'/og.png',link:{mobileWebUrl:url,webUrl:url}},
-      buttons:[{title:'결과 보기',link:{mobileWebUrl:url,webUrl:url}},{title:'내 이름도 해보기',link:{mobileWebUrl:location.origin+'/',webUrl:location.origin+'/'}}]});
+      buttons:[{title:'내 일본 이름 보기',link:{mobileWebUrl:url,webUrl:url}}]});
   }catch(e){
     const why=(e&&(e.message||e.code))||'알 수 없는 오류';
     toast('카카오톡 공유를 열지 못했어요 ('+why+'). 다른 방법으로 공유할게요.');
@@ -1195,8 +1200,9 @@ render(EXAMPLE);updateHints();
 const b64u={enc:b=>{let s='';b.forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},
   dec:t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const s=atob(t);return Uint8Array.from(s,c=>c.charCodeAt(0))}};
 async function zip(bytes,mode){const cs=mode==='c'?new CompressionStream('deflate-raw'):new DecompressionStream('deflate-raw');const st=new Blob([bytes]).stream().pipeThrough(cs);return new Uint8Array(await new Response(st).arrayBuffer())}
-async function packResult(res){
-  const o={k:res.kname,a:res.source==='ai'?1:0,s:[res.sur.kanji,res.sur.kr],g:res.giv.map(x=>[x.kanji,x.kr]),n:res.names.map(n=>[n.sk,n.stype,n.parts,n.gtype,n.meaning,n.vibe])};
+async function packResult(res,only){
+  const list=typeof only==='number'?[res.names[only]]:res.names;
+  const o={k:res.kname,a:res.source==='ai'?1:0,s:[res.sur.kanji,res.sur.kr],g:res.giv.map(x=>[x.kanji,x.kr]),n:list.map(n=>[n.sk,n.stype,n.parts,n.gtype,n.meaning,n.vibe])};
   const raw=new TextEncoder().encode(JSON.stringify(o));
   try{if(window.CompressionStream)return 'z'+b64u.enc(await zip(raw,'c'))}catch(_){}
   return 'j'+b64u.enc(raw);
@@ -1219,14 +1225,14 @@ async function unpackResult(t){
 }
 async function updateShareState(){
   const res=current;if(!res||res.source==='example')return;
-  try{res.packed=await packResult(res)}catch(_){res.packed=''}
+  try{res.packed=await packResult(res);res.packedEach=await Promise.all(res.names.map((_,k)=>packResult(res,k)))}catch(_){res.packed='';res.packedEach=[]}
   if(res!==current)return;
   try{const u=new URL(location.href);u.search='';u.searchParams.set('s',res.sur.kanji);u.searchParams.set('g',res.giv.map(g=>g.kanji).join(''));if(res.sel)u.searchParams.set('p',String(res.sel));if(res.packed)u.searchParams.set('r',res.packed);history.replaceState(null,'',u)}catch(_){}
 }
 function fillForm(res){$('#f-sur').value=res.sur.kanji;$('#f-g1').value=res.giv[0]?res.giv[0].kanji:'';$('#f-g2').value=res.giv[1]?res.giv[1].kanji:'';updateHints()}
 setStatus('on');
 (async()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g'),r=p.get('r');
-  if(r){const res=await unpackResult(r);if(res){fillForm(res);render(res);res.packed=r;return}}
+  if(r){const res=await unpackResult(r);if(res){fillForm(res);render(res);updateShareState();return}}
   if(sk&&gk&&HAN.test(sk)){const gs=[...gk].filter(c=>HAN.test(c)).slice(0,2);$('#f-sur').value=[...sk][0];$('#f-g1').value=gs[0]||'';$('#f-g2').value=gs[1]||'';updateHints();submit()}})();
 </script>
 
