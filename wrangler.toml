@@ -19,3 +19,7 @@ IP_LIMIT_PER_10MIN = "20"
 # [[kv_namespaces]]
 # binding = "NAMES"
 # id = "여기에_KV_ID_붙여넣기"
+
+# 실패 원인 로그 보기 (대시보드 > Worker > Logs)
+[observability]
+enabled = true

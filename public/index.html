@@ -102,6 +102,20 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .runner .r1 span{color:var(--muted);font-weight:500;margin-left:6px}
 .runner .meaning,.runner .vibe{font-size:13px}
 .pick-hint{margin:0;font-size:13px;color:var(--muted)}
+.trip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
+.trip .t-eyebrow{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:600}
+.trip h3{margin:0;font-family:var(--f-display);font-size:24px;line-height:1.3;text-wrap:balance}
+.trip h3 .city{color:var(--shu)}
+.trip .t-line{margin:0;color:var(--muted)}
+.trip .t-links{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.trip .t-links a{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px}
+.trip .t-links a:hover{border-color:var(--indigo)}
+.trip .t-links a:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.trip .t-links b{font-size:15px}
+.trip .t-links span{font-size:12px;color:var(--muted)}
+.trip .t-links a.empty{border-style:dashed;pointer-events:none}
+.trip .t-note{margin:0;font-size:11px;color:var(--muted)}
+@media (max-width:640px){.trip .t-links{grid-template-columns:1fr}}
 
 .thinking{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:28px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .brush{font:800 34px var(--f-display);color:var(--shu);animation:pulse 1.4s ease-in-out infinite}
@@ -188,9 +202,11 @@ footer a{color:inherit}
 
   <section class="results" id="results" aria-live="polite">
     <div class="results" id="res-main"></div>
-    <!-- 광고 자리 A: 1순위 이름 바로 아래 (가장 많이 보이는 자리) -->
-    <aside class="ad-slot" id="ad-mid" data-slot="mid" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
     <div class="results" id="res-rest"></div>
+    <!-- 여행 제휴 카드: 마이리얼트립·클룩·아고다 등 제휴 링크 (TRAVEL 설정) -->
+    <aside class="trip" id="trip" hidden></aside>
+    <!-- 광고 자리 A: 추천 이름 아래 (애드센스·애드핏) -->
+    <aside class="ad-slot" id="ad-mid" data-slot="mid" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
   </section>
 
 
@@ -582,7 +598,120 @@ const GIV_RAW = `民|백성 민|みん|たみ
 嘉|아름다울 가|か|よし
 佳|아름다울 가|か|よし
 雲|구름 운|うん|くも
-燁|빛날 엽|よう|`;
+燁|빛날 엽|よう|
+旼|화할 민|びん|
+舒|펼 서|じょ|のぶ
+抒|풀 서|じょ|のぶ
+埈|높을 준|しゅん|たか
+晙|밝을 준|しゅん|あき
+濬|깊을 준|しゅん|ふかし
+玹|옥돌 현|げん|
+晛|햇살 현|けん|
+祉|복 지|し|よし,とみ
+玧|귀막이옥 윤|いん|
+誾|화평할 은|ぎん|
+垠|언덕 은|ぎん|
+受|받을 수|じゅ|
+藝|재주 예|げい||芸
+娟|예쁠 연|けん|
+維|벼리 유|い|これ
+儒|선비 유|じゅ|
+宥|너그러울 유|ゆう|ひろ
+埰|사패지 채|さい|
+兒|아이 아|じ|こ|児
+度|법도 도|ど|のり
+是|옳을 시|ぜ|これ,よし
+詩|시 시|し|うた
+始|비로소 시|し|はじめ
+胄|자손 주|ちゅう|
+鍈|방울소리 영|えい|
+煐|빛날 영|えい|
+盛|성할 성|せい|もり,しげ
+材|재목 재|ざい|き
+爀|불빛 혁|かく|
+乾|하늘 건|けん|いぬい
+鍵|열쇠 건|けん|かぎ
+兌|바꿀 태|だ|
+嬉|아름다울 희|き|よし
+娜|아리따울 나|だ|
+那|어찌 나|な|とも
+奈|어찌 나|な|
+斌|빛날 빈|ひん|あきら
+韓|나라 한|かん|
+漢|한수 한|かん|
+翰|편지 한|かん|ふみ
+霞|노을 하|か|かすみ
+桐|오동 동|とう|きり
+棟|마룻대 동|とう|むね
+卿|벼슬 경|けい|
+鏡|거울 경|きょう|かがみ
+上|윗 상|じょう|かみ
+常|떳떳할 상|じょう|つね
+丞|도울 승|じょう|すけ
+遠|멀 원|えん|とお
+圓|둥글 원|えん|まどか|円
+瑗|구슬 원|えん|
+靜|고요할 정|せい|しず|静
+禎|상서 정|てい|さだ,よし
+好|좋을 호|こう|よし
+湖|호수 호|こ|みずうみ
+豪|호걸 호|ごう|たけし
+晧|밝을 호|こう|ひろ
+蕙|혜초 혜|けい|
+細|가늘 세|さい|ほそ
+素|본디 소|そ|もと
+炤|밝을 소|しょう|あき
+韶|풍류이름 소|しょう|
+渼|물놀이 미|び|
+先|먼저 선|せん|さき
+璿|구슬 선|せん|
+鮮|고울 선|せん|あざ
+栗|밤 률|りつ|くり
+隣|이웃 린|りん|ちか
+麟|기린 린|りん|
+璘|옥빛 린|りん|
+莉|말리 리|り|
+俐|똑똑할 리|り|
+珪|홀 규|けい|
+揆|헤아릴 규|き|
+用|쓸 용|よう|
+鎔|쇠녹일 용|よう|
+溶|녹을 용|よう|
+奭|클 석|せき|
+晳|밝을 석|せき|あきら
+喆|밝을 철|てつ|
+印|도장 인|いん|しるし
+讚|기릴 찬|さん||讃
+璨|옥빛 찬|さん|
+桓|굳셀 환|かん|たけ
+起|일어날 기|き|おき
+紀|벼리 기|き|のり
+麒|기린 기|き|
+代|대신할 대|だい|よ
+書|글 서|しょ|ふみ
+序|차례 서|じょ|つぐ
+伊|저 이|い|これ
+怡|기쁠 이|い|
+解|풀 해|かい|
+謙|겸손할 겸|けん|ゆずる
+潔|깨끗할 결|けつ|きよし
+潭|못 담|たん|ふち
+羅|벌릴 라|ら|
+嵐|남기 람|らん|あらし
+路|길 로|ろ|みち
+樓|다락 루|ろう||楼
+林|수풀 림|りん|はやし
+飛|날 비|ひ|とび
+瑟|큰거문고 슬|しつ|
+如|같을 여|じょ|ゆき
+溫|따뜻할 온|おん|あつ|温
+婉|순할 완|えん|
+宜|마땅 의|ぎ|よし
+超|뛰어넘을 초|ちょう|
+草|풀 초|そう|くさ
+訓|가르칠 훈|くん|のり
+欽|공경할 흠|きん|よし
+洪|넓을 홍|こう|ひろ`;
 
 function parseSur(raw){return raw.trim().split('\n').map(l=>{const [c,kr,rd,jp]=l.split('|');return {c,kr,jp:jp||c,readings:rd.split(',').map(x=>{const [k,t]=x.split(':');return {k,t}})}})}
 function parseGiv(raw){return raw.trim().split('\n').map(l=>{const [c,kr,on,kun,jp]=l.split('|');return {c,kr,jp:jp||c,on:on?on.split(','):[],kun:kun?kun.split(',').filter(Boolean):[]}})}
@@ -747,14 +876,14 @@ function render(res){
       <p class="meaning">${esc(n.meaning)}</p><p class="vibe">${esc(n.vibe)}</p></div>
     <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
   $('#res-rest').innerHTML=rest;
-  adsVisible(true);
+  adsVisible(true);renderTrip(res);
 }
 function showThinking(){
-  adsVisible(false);$('#res-rest').innerHTML='';
+  adsVisible(false);$('#trip').hidden=true;$('#res-rest').innerHTML='';
   $('#res-main').innerHTML=`<div class="thinking"><span class="brush" lang="ja">命名中</span><div><div style="font-weight:600">한자 읽기를 고르는 중이에요</div><div class="status">보통 몇 초면 끝나요</div></div><button class="btn small ghost" type="button" id="stop">멈추기</button></div>`;
   $('#stop').onclick=()=>currentCtl&&currentCtl.abort();
 }
-function showError(msg){adsVisible(false);$('#res-rest').innerHTML='';$('#res-main').innerHTML=`<p class="err">${esc(msg)}</p>`}
+function showError(msg){adsVisible(false);$('#trip').hidden=true;$('#res-rest').innerHTML='';$('#res-main').innerHTML=`<p class="err">${esc(msg)}</p>`}
 
 /* ---------- Example (preloaded) ---------- */
 const EXAMPLE={source:'example',kname:'홍길동',sur:{kanji:'洪',kr:'성 홍'},giv:[{kanji:'吉',kr:'길할 길'},{kanji:'同',kr:'한가지 동'}],notes:[],names:[
@@ -787,7 +916,8 @@ async function submit(e){
     showThinking();$('#go').disabled=true;currentCtl=new AbortController();
     try{
       const payload={sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr,raw:g.raw}))};
-      const resp=await fetch('/api/name',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:currentCtl.signal});
+      let timedOut=false;const tmo=setTimeout(()=>{timedOut=true;currentCtl&&currentCtl.abort()},45000);
+      const resp=await fetch('/api/name',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:currentCtl.signal}).finally(()=>clearTimeout(tmo));
       const d=await resp.json().catch(()=>null);
       if(!resp.ok||!d||d.error)throw {code:(d&&d.error)||'upstream'};
       d.names=(d.names||[]);
@@ -802,11 +932,12 @@ async function submit(e){
       render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});setShareURL(rs.kanji,rg.map(x=>x.kanji).join(''));
       return;
     }catch(err){
-      const code=err&&(err.name==='AbortError'?'cancelled':err.code);
+      const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
       if(code==='cancelled'){ if(!allLocal){showError('멈췄어요. 다시 짓기를 눌러 주세요.');return} }
       if(code==='budget'||code==='not_configured'){aiOK=false;setStatus('off')}
       const why={budget:'오늘 AI 작명 한도가 다 차서',rate_limited:'요청이 너무 잦아서',cancelled:'AI 작명을 멈춰서',not_configured:'AI 연결이 아직 설정되지 않아서',invalid:'AI 응답이 고르지 않아서',invalid_json:'AI 응답이 고르지 않아서'}[code]||'AI 연결이 잠시 안 돼서';
-      if(!allLocal){showError(`${why} 이름을 짓지 못했어요. 사전에 없는 글자가 있으면 AI가 필요해요. 잠시 뒤 다시 시도해 주세요.`);return}
+      if(!allLocal){const miss=[sur,...giv].filter(x=>!x.entry).map(x=>x.kanji||x.raw);
+        showError(`${why} 이름을 짓지 못했어요. ${miss.map(m=>'「'+m+'」').join(' ')}${josa(miss[miss.length-1]||'자','는','은')} 내장 사전에 없어서 AI가 꼭 필요한 글자예요. 잠시 뒤 다시 눌러 주세요. (오류 코드: ${code})`);return}
       notes.push(`${why} 사전 규칙으로 지었어요.`);
     }finally{$('#go').disabled=false;currentCtl=null}
   }else if(!allLocal){
@@ -863,7 +994,7 @@ async function openShare(i){
   $('#share-msg').textContent='휴대폰에서는 이미지를 길게 눌러 저장할 수도 있어요.';
   const cv=await makeCard(n);$('#share-img').src=cv.toDataURL('image/png');
   shareBlob=await new Promise(r=>cv.toBlob(r,'image/png'));shareName=`japanese-name-${v.roma.replace(/\s+/g,'-')}.png`;
-  shareIdx=i;shareText=`내 일본 이름은 ${v.kanji}(${v.kana}), ${v.hangul}! 캐릭터 설정: ${n.vibe}`;
+  shareIdx=i;shareText=`내 일본 이름은 ${v.kanji}(${v.kana}), ${v.hangul}! 캐릭터 설정: ${n.vibe} · 어울리는 여행지: ${cityFor(current,n).name}`;
   const url=shareURL(),t=shareText;
   $('#sns-x').href='https://x.com/intent/post?text='+encodeURIComponent(t)+'&url='+encodeURIComponent(url);
   $('#sns-threads').href='https://www.threads.net/intent/post?text='+encodeURIComponent(t+'\n'+url);
@@ -914,6 +1045,40 @@ if(KAKAO_JS_KEY){
   const sc=document.createElement('script');sc.src=KAKAO_SDK;sc.crossOrigin='anonymous';sc.async=true;
   sc.onload=()=>{try{if(!Kakao.isInitialized())Kakao.init(KAKAO_JS_KEY);kakaoReady=Kakao.isInitialized();if(kakaoReady&&current)render(current)}catch(_){}};
   document.head.appendChild(sc);
+}
+
+/* ---------- Travel (제휴 링크) ---------- */
+// ▼ 마이리얼트립 파트너스·클룩·아고다 등에서 받은 제휴 링크를 넣으면 '일본 여행' 카드가 켜져요.
+//   기본 링크 3개만 채워도 되고, 도시별 링크(cities)는 있으면 그걸 먼저 써요.
+const TRAVEL={
+  tour:'',   // 투어·입장권 (예: 마이리얼트립/클룩 일본 투어 페이지 제휴 링크)
+  esim:'',   // 일본 eSIM·포켓와이파이
+  hotel:'',  // 숙소 (예: 아고다 일본 숙소 제휴 링크)
+  cities:{   // 선택: 도시별 링크  예) osaka:{tour:'https://...', hotel:'https://...'}
+    tokyo:{}, osaka:{}, kyoto:{}, fukuoka:{}, sapporo:{}, okinawa:{}
+  }
+};
+const CITIES=[
+  {id:'tokyo',name:'도쿄',line:'시부야 스크램블 교차로 한복판에서 새 이름으로 셀카 한 장'},
+  {id:'osaka',name:'오사카',line:'도톤보리에서 타코야키 들고 글리코상 포즈'},
+  {id:'kyoto',name:'교토',line:'기온 골목 찻집에서 말차 한 잔, 천 년 된 절 산책'},
+  {id:'fukuoka',name:'후쿠오카',line:'나카스 포장마차에서 돈코츠 라멘 한 그릇'},
+  {id:'sapporo',name:'삿포로',line:'오타루 운하 눈길 걷고 징기스칸으로 마무리'},
+  {id:'okinawa',name:'오키나와',line:'에메랄드빛 바다에서 스노클링, 저녁엔 오리온 맥주'}
+];
+function cityFor(res,n){return CITIES[hash(res.sur.kanji+n.sk+n.parts.join(''))%CITIES.length]}
+function travelLinks(c){const x=TRAVEL.cities[c.id]||{};return {tour:x.tour||TRAVEL.tour,esim:x.esim||TRAVEL.esim,hotel:x.hotel||TRAVEL.hotel}}
+function renderTrip(res){
+  const box=$('#trip');const n=res.names[res.sel||0];const v=nameView(res,n);const c=cityFor(res,n);const L=travelLinks(c);
+  const any=L.tour||L.esim||L.hotel;
+  if(!any&&!AD_PREVIEW){box.hidden=true;return}
+  const item=(url,title,sub)=>url?`<a href="${esc(url)}" target="_blank" rel="noopener sponsored">${title}<span>${sub}</span></a>`:(AD_PREVIEW?`<a class="empty">${title}<span>제휴 링크를 넣으면 켜져요</span></a>`:'');
+  box.innerHTML=`<div class="t-eyebrow">일본 이름으로 일본 여행</div>
+    <h3>${esc(v.hangul)} 씨에게 어울리는 여행지는 <span class="city">${esc(c.name)}</span></h3>
+    <p class="t-line">${esc(c.line)}</p>
+    <div class="t-links">${item(L.tour,`<b>${esc(c.name)} 투어·입장권</b>`,'현지 체험, 교통패스')}${item(L.esim,'<b>일본 eSIM·와이파이</b>','도착하자마자 바로 연결')}${item(L.hotel,`<b>${esc(c.name)} 숙소</b>`,'호텔·료칸 최저가')}</div>
+    <p class="t-note">제휴 링크예요. 이 링크로 예약하면 사이트 운영에 쓰이는 수수료를 받을 수 있고, 내는 금액은 똑같아요.</p>`;
+  box.hidden=false;
 }
 
 /* ---------- Ads ---------- */
