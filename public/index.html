@@ -106,6 +106,8 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .runner .meaning,.runner .vibe{font-size:13px}
 .pick-hint{margin:0;font-size:13px;color:var(--muted)}
 .pick-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
+.regen-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
+.regen-row span{font-size:13px;color:var(--muted)}
 .trip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .trip .t-eyebrow{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:600}
 .trip h3{margin:0;font-family:var(--f-display);font-size:24px;line-height:1.3;text-wrap:balance}
@@ -129,6 +131,7 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 
 footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
 footer a{color:inherit}
+footer .ver{opacity:.6}
 
 .modal{position:fixed;inset:0;background:rgba(10,12,16,.6);display:grid;place-items:center;z-index:20;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .sheet{background:var(--surface);border-radius:12px;padding:18px;max-width:420px;width:100%;display:flex;flex-direction:column;gap:12px;max-height:100%;overflow:auto;box-sizing:border-box}
@@ -218,7 +221,7 @@ footer a{color:inherit}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer>한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v8</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -776,7 +779,7 @@ function conv(kana){
 const mora=k=>toHira(k).replace(/[ゃゅょ]/g,'').length;
 
 /* ---------- Offline (dictionary) naming ---------- */
-const ENDINGS=new Set(['お','た','や','こ','み','よ','え','ま','すけ','ひこ']);
+const ENDINGS=new Set(['お','た','や','こ','み','よ','え','ま','と','き','か','な','ほ','すけ','ひこ','ろう','すけ','へい']);
 const VIBES={
   oo:['막부 말기 떠돌이 검객','교토 고서점 3대째 주인','전국대회 우승한 검도부 주장','라멘 국물에 인생 건 장인','신칸센 기관사 20년 차'],
   kk:['홋카이도 목장집 둘째','시골 신사의 다정한 신관','여름방학 청춘 애니 주인공','바닷가 마을 우체부','오키나와 민박집 사장'],
@@ -797,13 +800,17 @@ function offlineNames(sur,giv,exclude){
   const out=[];
   for(const so of sOpts)for(const c of combos){
     const gk=c.map(x=>x.k).join('');const m=mora(gk);let s=0;
-    if(c.length===1){s=c[0].t==='kun'?(m>=2?2.6:1.2):2.2}
+    if(c.length===1){s=c[0].t==='kun'?(m>=2?3.2:1.2):(m>=2?1.8:1)}
     else{const [a,b]=c;
-      if(a.t==='on'&&b.t==='on')s=3;else if(a.t==='kun'&&b.t==='kun')s=2.4;
-      else if(a.t==='on'&&b.t==='kun')s=ENDINGS.has(b.k)?2.8:1.6;else s=1.4;
+      // 훈독(이름 읽기)이 들어간 조합을 우선: 실제 일본 이름처럼 들리게
+      if(a.t==='kun'&&b.t==='kun')s=3.4;else if(a.t==='on'&&b.t==='kun')s=ENDINGS.has(b.k)?3.1:2.3;
+      else if(a.t==='kun'&&b.t==='on')s=2.2;else s=1.5;
       if(a.t==='kun'&&b.t==='kun'&&ENDINGS.has(b.k))s+=.3;
-      if(b.t==='kun'&&mora(b.k)===1&&!ENDINGS.has(b.k))s-=.4;}
-    s+=(m>=3&&m<=4)?.6:m===2?.2:m===5?-.3:m>=6?-1:-.6;
+      if(b.t==='kun'&&mora(b.k)===1&&!ENDINGS.has(b.k))s-=1.2;
+      // 두 글자 이름에서는 さとる·めぐみ처럼 긴 단독 이름 읽기를 피함 (とも+ひで처럼 짧게)
+      if(mora(a.k)>=3||mora(b.k)>=3)s-=1.6;
+      if(a.k===b.k)s-=2;}
+    s+=(m>=3&&m<=4)?.6:m===2?.2:m===5?-.8:m>=6?-2:-.6;
     if(so.t==='kun')s+=.5; if(mora(so.k)===1)s-=.2;
     out.push({sk:so.k,st:so.t,parts:c.map(x=>x.k),types:c.map(x=>x.t),score:s});
   }
@@ -871,7 +878,7 @@ function render(res){
       <p class="vibe">${esc(a.vibe)}</p>
       <div class="acts"><button class="btn small kakao" type="button" data-kakao="${sel}" ${kakaoReady?'':'hidden'}>카톡으로 보내기</button><button class="btn small" type="button" data-share="${sel}">공유 카드 만들기</button></div>
     </div></article>`;
-  html+=`<div class="pick-row">${res.names.length>1?'<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>':''}<button class="btn small ghost" type="button" data-regen>다른 이름 3개 더 보기</button></div>`;
+  html+=`<div class="pick-row">${res.names.length>1?'<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>':''}</div>`;
   $('#res-main').innerHTML=html;
   let rest='';
   res.names.forEach((n,i)=>{if(i===sel)return;const v=nameView(res,n);rest+=`<article class="runner">
@@ -881,6 +888,7 @@ function render(res){
       <div class="chips"><span class="chip">성 ${esc(n.stype)}</span><span class="chip">이름 ${esc(n.gtype)}</span></div>
       <p class="meaning">${esc(n.meaning)}</p><p class="vibe">${esc(n.vibe)}</p></div>
     <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
+  rest+=`<div class="regen-row"><button class="btn" type="button" data-regen>다른 이름 3개 더 보기</button><span>같은 한자로 다른 읽기를 다시 지어 봐요</span></div>`;
   $('#res-rest').innerHTML=rest;
   adsVisible(true);renderTrip(res);
 }
@@ -936,12 +944,12 @@ async function submit(e,opts){
       const rs=fix(sur,d.surname),rg=giv.map((g,i)=>fix(g,d.given&&d.given[i]));
       if(d.note)notes.push(esc(d.note));
       const kn2=kName([rs,...rg].map((x,i)=>x.kr?eumOf(x.kr):[...kn][i]));
-      render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});updateShareState();
+      lastAIError='';setStatus('on');render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});updateShareState();
       return;
     }catch(err){
       const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
       if(code==='cancelled'){ if(!allLocal){showError('멈췄어요. 다시 짓기를 눌러 주세요.');return} }
-      if(code==='budget'||code==='not_configured'){aiOK=false;setStatus('off')}
+      lastAIError=code;if(code==='budget'||code==='not_configured'){aiOK=false}setStatus('off');
       const why={budget:'오늘 AI 작명 한도가 다 차서',rate_limited:'요청이 너무 잦아서',cancelled:'AI 작명을 멈춰서',not_configured:'AI 연결이 아직 설정되지 않아서',invalid:'AI 응답이 고르지 않아서',invalid_json:'AI 응답이 고르지 않아서'}[code]||'AI 연결이 잠시 안 돼서';
       if(!allLocal){const miss=[sur,...giv].filter(x=>!x.entry).map(x=>x.kanji||x.raw);
         showError(`${why} 이름을 짓지 못했어요. ${miss.map(m=>'「'+m+'」').join(' ')}${josa(miss[miss.length-1]||'자','는','은')} 내장 사전에 없어서 AI가 꼭 필요한 글자예요. 잠시 뒤 다시 눌러 주세요. (오류 코드: ${code})`);return}
@@ -1122,9 +1130,9 @@ function initAds(){
 function adsVisible(show){document.querySelectorAll('.ad-slot').forEach(el=>{el.hidden=!(el.dataset.on==='1'&&(show||el.id==='ad-bottom'))})}
 
 /* ---------- Wiring ---------- */
-let aiState='on';
+let aiState='on',lastAIError='';
 function setStatus(s){aiState=s;const dot=$('#dot');dot.className='dot '+(s==='on'?'on':s==='off'?'off':'');
-  $('#status-text').textContent=s==='on'?'AI 작명':'사전 모드 · 내장 사전과 규칙으로 지어요';updateHints()}
+  $('#status-text').textContent=s==='on'?'AI 작명':'사전 모드 · 내장 사전과 규칙으로 지어요'+(lastAIError?` (원인: ${lastAIError})`:'');updateHints()}
 $('#form').addEventListener('submit',submit);
 $('#form').addEventListener('click',e=>{const b=e.target.closest('.hfix');if(b){$('#'+b.dataset.target).value=b.dataset.val;updateHints()}});
 ['f-sur','f-g1','f-g2'].forEach(id=>$('#'+id).addEventListener('input',updateHints));
