@@ -2,6 +2,8 @@
 name = "jp-name"
 main = "src/worker.js"
 compatibility_date = "2026-10-01"
+# 대시보드에서 넣은 변수를 배포할 때 지우지 않게 함
+keep_vars = true
 
 [assets]
 directory = "./public"

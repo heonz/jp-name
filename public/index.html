@@ -12,7 +12,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23D2B282'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%232B1F12' font-family='serif'%3E名%3C/text%3E%3C/svg%3E">
 <!-- 애드센스 심사용 코드는 여기에 붙여넣기 (애드센스 화면에서 주는 <script async src="https://pagead2.googlesyndication.com/...">). 광고 단위 설정은 아래 스크립트의 ADS 항목에서 해요. -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2133269293744964"
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2133269293744964"
      crossorigin="anonymous"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,6 +55,7 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .field input{font:600 20px/1.3 var(--f-body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:6px;padding:10px 12px;width:100%;box-sizing:border-box;min-width:0}
 .field input:focus{outline:2px solid var(--indigo);outline-offset:1px;border-color:transparent}
 .field .hint{font-size:12px;color:var(--muted);min-height:1.2em}
+.field .hint .hfix{font:600 14px var(--f-display);background:var(--chip);color:var(--ink);border:0;border-radius:4px;padding:1px 7px;margin:2px 4px 0 0;cursor:pointer}
 .field .hint b{font-family:var(--f-display);font-size:15px;color:var(--ink)}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .btn{font:600 15px var(--f-body);border-radius:6px;padding:11px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
@@ -714,7 +715,8 @@ const GIV_RAW = `民|백성 민|みん|たみ
 草|풀 초|そう|くさ
 訓|가르칠 훈|くん|のり
 欽|공경할 흠|きん|よし
-洪|넓을 홍|こう|ひろ`;
+洪|넓을 홍|こう|ひろ
+率|거느릴 솔|そつ|`;
 
 function parseSur(raw){return raw.trim().split('\n').map(l=>{const [c,kr,rd,jp]=l.split('|');return {c,kr,jp:jp||c,readings:rd.split(',').map(x=>{const [k,t]=x.split(':');return {k,t}})}})}
 function parseGiv(raw){return raw.trim().split('\n').map(l=>{const [c,kr,on,kun,jp]=l.split('|');return {c,kr,jp:jp||c,on:on?on.split(','):[],kun:kun?kun.split(',').filter(Boolean):[]}})}
@@ -902,7 +904,8 @@ function updateHints(){
     if(!r){el.textContent='';return}
     if(r.entry)el.innerHTML=`<b lang="ja">${esc(r.kanji)}</b> ${esc(r.kr)}${r.guessed?' · 음만 적어서 가장 흔한 글자로 골랐어요':''}`;
     else if(r.kanji)el.innerHTML=`<b lang="ja">${esc(r.kanji)}</b> 사전에 없는 글자 · AI가 읽어요`;
-    else el.textContent=aiOK?'사전에 없어요 · AI가 찾아볼게요':'사전에 없어요 · 한자를 직접 넣어 주세요';
+    else{const eum=eumOf(r.raw||'');const n=eum.length===1?dueum(eum):'';const c=n?d.filter(x=>dueum(eumOf(x.kr))===n).slice(0,6):[];
+      el.innerHTML=(aiOK?'사전에 없어요 · AI가 찾아볼게요':'사전에 없어요 · 한자를 직접 넣어 주세요')+(c.length?'<br>혹시 이 글자? '+c.map(x=>`<button type="button" class="hfix" data-target="${f}" data-val="${esc(x.kr)}" title="${esc(x.kr)}" lang="ja">${esc(x.jp)}</button>`).join(''):'');}
   });
 }
 async function submit(e,opts){
@@ -1028,7 +1031,8 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').hidden=t
 
 /* ---------- Share helpers ---------- */
 // ▼ 카카오 개발자 콘솔의 JavaScript 키를 넣으면 카카오톡 공유 버튼이 켜져요.
-const KAKAO_JS_KEY='89dc160f63a3f54fcd9cce435ef2222a';
+// 카카오 앱이 두 개라서 주소에 따라 키를 골라 써요. (workers.dev 주소용 / 새 도메인용)
+const KAKAO_JS_KEY=location.hostname.endsWith('.workers.dev')?'89dc160f63a3f54fcd9cce435ef2222a':'e5b5eb67141c89fbaabe42578e716a01';
 const KAKAO_SDK='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js';
 const IN_APP=/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|everytimeApp/i.test(navigator.userAgent);
 let kakaoReady=false;
@@ -1088,8 +1092,8 @@ function renderTrip(res){
 /* ---------- Ads ---------- */
 // ▼ 광고 승인 후 여기만 채우면 돼요. 주소 끝에 ?adpreview 를 붙이면 광고 자리를 미리 볼 수 있어요.
 const ADS={
-  provider:'',            // 'adfit' (카카오 애드핏) 또는 'adsense' (구글 애드센스)
-  adsenseClient:'',       // 애드센스: 'ca-pub-0000000000000000' (심사 중에도 이것만 넣어 두면 돼요)
+  provider:'adsense',     // 'adfit' (카카오 애드핏) 또는 'adsense' (구글 애드센스)
+  adsenseClient:'ca-pub-2133269293744964', // 애드센스: 'ca-pub-0000000000000000' (심사 중에도 이것만 넣어 두면 돼요)
   slots:{
     mid:   {pc:[728,90], mobile:[300,250], adfitPC:'', adfitMobile:'', adsenseSlot:''},  // 1순위 이름 아래
     bottom:{pc:[728,90], mobile:[320,100], adfitPC:'', adfitMobile:'', adsenseSlot:''}   // 페이지 하단
@@ -1122,6 +1126,7 @@ let aiState='on';
 function setStatus(s){aiState=s;const dot=$('#dot');dot.className='dot '+(s==='on'?'on':s==='off'?'off':'');
   $('#status-text').textContent=s==='on'?'AI 작명':'사전 모드 · 내장 사전과 규칙으로 지어요';updateHints()}
 $('#form').addEventListener('submit',submit);
+$('#form').addEventListener('click',e=>{const b=e.target.closest('.hfix');if(b){$('#'+b.dataset.target).value=b.dataset.val;updateHints()}});
 ['f-sur','f-g1','f-g2'].forEach(id=>$('#'+id).addEventListener('input',updateHints));
 $('#results').addEventListener('click',e=>{
   const s=e.target.closest('[data-share]');if(s){openShare(+s.dataset.share);return}
