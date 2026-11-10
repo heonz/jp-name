@@ -46,6 +46,10 @@ header{display:flex;flex-direction:column;gap:8px}
 .eyebrow{font-size:12px;letter-spacing:.14em;color:var(--muted);font-weight:500}
 h1{font-family:var(--f-display);font-weight:800;font-size:clamp(30px,6vw,48px);line-height:1.15;margin:0;text-wrap:balance}
 h1 .ja{color:var(--shu)}
+h1 .home{color:inherit;text-decoration:none}
+h1 .home:hover{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:6px}
+h1 .home:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-radius:4px}
+.regen-row a.btn{text-decoration:none}
 .lede{margin:0;color:var(--muted);max-width:60ch}
 
 form{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:16px}
@@ -178,7 +182,7 @@ footer .ver{opacity:.6}
 <div class="wrap">
   <header>
     <div class="eyebrow">한자 → 일본식 읽기 · 재미로 짓는 이름</div>
-    <h1>내 이름, <span class="ja">일본</span>에선 뭐라고 읽을까?</h1>
+    <h1><a class="home" href="/" title="처음으로">내 이름, <span class="ja">일본</span>에선 뭐라고 읽을까?</a></h1>
     <p class="lede">이름 한자를 훈음으로 적어 주세요. 성은 한자 그대로 두고 읽는 법만 바꾸고, 이름은 음독·훈독을 섞어 일본 이름답게 세 가지를 추천 순으로 지어 드려요.</p>
   </header>
 
@@ -234,7 +238,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v11</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v12</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -913,7 +917,7 @@ function render(res){
       <div class="chips"><span class="chip">성 ${esc(n.stype)}</span><span class="chip">이름 ${esc(n.gtype)}</span></div>
       <p class="meaning">${esc(n.meaning)}</p><p class="vibe">${esc(n.vibe)}</p></div>
     <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
-  rest+=`<div class="regen-row"><button class="btn" type="button" data-regen>다른 이름 3개 더 보기</button><span>같은 한자로 다른 읽기를 다시 지어 봐요</span></div>`;
+  rest+=`<div class="regen-row"><button class="btn" type="button" data-regen>다른 이름 3개 더 보기</button><a class="btn ghost" href="/" data-home>처음으로</a><span>같은 한자로 다른 읽기를 다시 지어 봐요</span></div>`;
   $('#res-rest').innerHTML=rest;
   adsVisible(true);renderTrip(res);
 }
@@ -1180,6 +1184,8 @@ let aiState='on',lastAIError='';
 function setStatus(s){aiState=s;const dot=$('#dot');dot.className='dot '+(s==='on'?'on':s==='off'?'off':'');
   $('#status-text').textContent=s==='on'?'AI 작명':'사전 모드 · 내장 사전과 규칙으로 지어요'+(lastAIError?` (원인: ${lastAIError})`:'');updateHints()}
 $('#form').addEventListener('submit',submit);
+// 처음으로: 입력해 둔 이름도 비우고 첫 화면으로
+document.addEventListener('click',e=>{if(e.target.closest('a.home,[data-home]')){try{localStorage.removeItem('jpname-last')}catch(_){}}});
 $('#form').addEventListener('click',e=>{const b=e.target.closest('.hfix');if(b){$('#'+b.dataset.target).value=b.dataset.val;updateHints()}});
 ['f-sur','f-g1','f-g2'].forEach(id=>$('#'+id).addEventListener('input',updateHints));
 $('#results').addEventListener('click',e=>{
