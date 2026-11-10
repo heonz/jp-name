@@ -15,7 +15,7 @@
 
 const HAN = /\p{Script=Han}/u;
 const KANA = /^[ぁ-ゖー]+$/;
-const CACHE_VERSION = "v4";
+const CACHE_VERSION = "v5";
 // 같은 한자 조합에 대해 서로 다른 결과를 몇 개까지 모아둘지.
 // 이 개수가 찰 때까지는 매번 새로 지어서(동명이인도 다른 이름), 다 차면 그중 하나를 무작위로 보여줘요.
 const VARIANTS = 4;
@@ -44,7 +44,7 @@ function part(x) {
   return out;
 }
 
-function buildPrompt(sur, giv, avoid) {
+function buildPrompt(sur, giv, avoid, gender) {
   const desc = (x) =>
     x.kanji ? `${x.kanji}${x.kr ? ` (${x.kr})` : ""}` : `"${x.raw}" (한국어 훈음 설명. 인명용 한자 하나로 확정할 것)`;
   return `너는 한국 사람 이름의 한자를 일본식으로 읽어서 '재미로' 일본 이름을 지어주는 작명가야.
@@ -52,6 +52,7 @@ function buildPrompt(sur, giv, avoid) {
 입력
 - 성: ${desc(sur)}
 - 이름 글자(순서대로, ${giv.length}글자): ${giv.map(desc).join(" / ")}
+- 성별: ${gender === "m" ? "남자" : gender === "f" ? "여자" : "정하지 않음"}
 
 규칙
 1. 성은 한자 한 글자를 그대로 유지하고, 일본어로 읽는 방법만 고른다(훈독 또는 음독). 글자를 덧붙이거나 바꾸지 마.
@@ -62,6 +63,7 @@ function buildPrompt(sur, giv, avoid) {
    - 음독+음독(예: みんち, りゅうしん)은 그 소리가 실제 일본 이름으로 흔할 때만 쓴다. 어색한 음독 나열은 피한다.
    - 3개 중 최소 2개는 훈독이나 이름용 읽기가 들어가게 한다. 성에 훈독이 있으면 훈독(예: 金→かね, 林→はやし, 河→かわ)을 먼저 고려한다.
    - 세 이름의 읽기는 서로 달라야 하고, 가장 일본 이름다운 것을 1순위로 둔다.
+${gender === "m" ? "   - 남자 이름이어야 한다. 일본 남자 이름에 흔한 읽기와 끝소리(예: ~と, ~き, ~や, ~た, ~すけ, ~ひこ, ~お, ~ひろ, けん·しん·しゅん 등)를 쓰고, 여자 이름처럼 들리는 ~こ·~み·~え·~か·~な는 피한다. 캐릭터 설정도 남자로.\n" : ""}${gender === "f" ? "   - 여자 이름이어야 한다. 일본 여자 이름에 흔한 읽기와 끝소리(예: ~こ, ~み, ~え, ~か, ~な, ~ほ, ~り, ~の, めぐみ·かおり·あや 등)를 쓰고, 남자 이름처럼 들리는 ~お·~すけ·~ひこ·~ろう·けん 같은 소리는 피한다. 캐릭터 설정도 여자로.\n" : ""}
 5. given_parts는 이름 글자마다 하나씩, 정확히 ${giv.length}개의 히라가나 문자열. 두 글자 읽기를 하나로 합치지 마.
 6. meaning: 원래 한자의 뜻을 살린 한국어 한 문장(40자 이내). vibe: 이 이름을 가진 일본 사람의 재미있는 캐릭터 설정, 한국어 18자 이내. 실존 인물·민족·외모 비하 금지.
 7. 한자는 일본 신자체로 적는다(예: 眞→真). kr에는 한국 훈음(예: "참 진").
@@ -171,9 +173,10 @@ export async function onRequestPost({ request, env }) {
   const label = [sur, ...giv].map((x) => x.kanji || x.raw).join("");
 
   const kv = env.NAMES;
-  const key = CACHE_VERSION + ":" + [sur, ...giv].map((x) => x.kanji || "raw:" + x.raw).join("|");
+  const key = CACHE_VERSION + ":" + (["m", "f"].includes(body.gender) ? body.gender : "n") + ":" + [sur, ...giv].map((x) => x.kanji || "raw:" + x.raw).join("|");
 
   const fresh = body.fresh === true;
+  const gender = body.gender === "m" || body.gender === "f" ? body.gender : "";
   const exclude = (Array.isArray(body.exclude) ? body.exclude : []).slice(0, 12).map((x) => clean(x, 30)).filter(Boolean);
 
   // 1) 저장된 결과들: 같은 한자 조합이어도 여러 버전을 모아두고 골고루 보여줌
@@ -251,13 +254,13 @@ export async function onRequestPost({ request, env }) {
   let result = null;
   try {
     for (let i = 0; i < 2 && !result; i++) {
-      const v = validate(await ask(buildPrompt(sur, giv, avoid)), n);
+      const v = validate(await ask(buildPrompt(sur, giv, avoid, gender)), n);
       if (v.why) console.log(`[name] ${label} dropped: ${v.why}`);
       result = v.result;
     }
     if (result && result.names.length < 3) {
       const have = result.names.map((x) => x.surname_kana + " " + x.given_parts.join("")).join(", ");
-      const v = validate(await ask(buildPrompt(sur, giv, avoid) +
+      const v = validate(await ask(buildPrompt(sur, giv, avoid, gender) +
         `\n\n이미 나온 이름: ${have}. 이것과 겹치지 않는 다른 읽기 조합을 더해서 names를 3개 채워.`), n);
       if (v.result) {
         const seen = new Set(result.names.map((x) => x.surname_kana + x.given_parts.join("")));

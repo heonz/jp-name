@@ -58,6 +58,12 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .field .hint .hfix{font:600 14px var(--f-display);background:var(--chip);color:var(--ink);border:0;border-radius:4px;padding:1px 7px;margin:2px 4px 0 0;cursor:pointer}
 .field .hint b{font-family:var(--f-display);font-size:15px;color:var(--ink)}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
+.gender{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.gender .g-label{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:500;margin-right:6px}
+.gender input{position:absolute;opacity:0;width:1px;height:1px}
+.gender label{font:600 14px var(--f-body);padding:7px 16px;border-radius:99px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.gender input:checked+label{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.gender input:focus-visible+label{outline:2px solid var(--indigo);outline-offset:2px}
 .btn{font:600 15px var(--f-body);border-radius:6px;padding:11px 18px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
 .btn:hover{filter:brightness(1.12)}
 .btn:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
@@ -193,6 +199,12 @@ footer .ver{opacity:.6}
         <div class="hint" id="h-g2"></div>
       </div>
     </div>
+    <div class="gender" role="radiogroup" aria-label="성별">
+      <span class="g-label">성별</span>
+      <input type="radio" name="gender" id="g-m" value="m"><label for="g-m">남자</label>
+      <input type="radio" name="gender" id="g-f" value="f"><label for="g-f">여자</label>
+      <input type="radio" name="gender" id="g-n" value="" checked><label for="g-n">상관없음</label>
+    </div>
     <div class="actions">
       <button class="btn" id="go" type="submit">일본 이름 짓기</button>
       <div class="status"><span class="dot on" id="dot"></span><span id="status-text">AI 작명</span></div>
@@ -221,7 +233,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v8</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v9</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -324,8 +336,8 @@ const SUR_RAW = `金|쇠 김|かね:훈,きん:음
 延|끌 연|のぶ:훈,えん:음`;
 
 // Given-name chars: char|훈음|on|kun,nanori|japanese form
-const GIV_RAW = `民|백성 민|みん|たみ
-敏|민첩할 민|びん|とし
+const GIV_RAW = `民|백성 민|みん|たみ,み
+敏|민첩할 민|びん|とし,はや
 珉|옥돌 민|みん|
 旻|하늘 민|びん|
 俊|준걸 준|しゅん|とし
@@ -338,8 +350,8 @@ const GIV_RAW = `民|백성 민|みん|たみ
 玄|검을 현|げん|はる
 顯|나타날 현|けん|あき|顕
 現|나타날 현|げん|
-秀|빼어날 수|しゅう|ひで
-英|꽃부리 영|えい|ひで
+秀|빼어날 수|しゅう|ひで,ほ
+英|꽃부리 영|えい|ひで,はな,え
 永|길 영|えい|なが
 榮|영화 영|えい|さかえ|栄
 瑛|옥빛 영|えい|あきら
@@ -356,7 +368,7 @@ const GIV_RAW = `民|백성 민|みん|たみ
 憲|법 헌|けん|のり,あきら
 津|나루 진|しん|つ
 眞|참 진|しん|まこと,ま|真
-珍|보배 진|ちん|
+珍|보배 진|ちん|たま
 鎭|진압할 진|ちん|しず|鎮
 振|떨칠 진|しん|
 辰|별 진|しん|たつ
@@ -381,17 +393,17 @@ const GIV_RAW = `民|백성 민|みん|たみ
 喜|기쁠 희|き|よし
 希|바랄 희|き|のぞみ
 禧|복 희|き|よし
-惠|은혜 혜|けい|めぐみ|恵
-慧|슬기로울 혜|けい|さと
-智|슬기 지|ち|とも,さとる
+惠|은혜 혜|けい|え,めぐみ|恵
+慧|슬기로울 혜|けい|さと,え
+智|슬기 지|ち|とも,さと,さとる
 志|뜻 지|し|ゆき
 知|알 지|ち|とも
 芝|지초 지|し|しば
 枝|가지 지|し|え
 美|아름다울 미|び|み,よし
-姸|고울 연|けん||妍
+姸|고울 연|けん|よし|妍
 妍|고울 연|けん|
-延|끌 연|えん|のぶ
+延|끌 연|えん|のぶ,のべ
 蓮|연꽃 련|れん|はす
 淵|못 연|えん|ふち
 然|그럴 연|ぜん|
@@ -786,11 +798,21 @@ const VIBES={
   mx:['도쿄 골목 카페 바리스타','심야 라디오 DJ','편의점 알바 3년 차 에이스','아키하바라 단골 수집가','교토 골목 찻집 주인'],
   one:['말수 적은 전학생','항구 마을 등대지기','비 오는 날만 여는 서점 주인']
 };
+const VIBES_M=['막부 말기 떠돌이 검객','전국대회 우승 검도부 주장','라멘 국물에 인생 건 장인','신칸센 기관사 20년 차','시부야 IT 스타트업 대표','홋카이도 목장집 둘째 아들','심야 라디오 DJ','교토 고서점 3대째 주인'];
+const VIBES_F=['교토 골목 찻집 주인','하라주쿠 빈티지숍 점장','여름방학 청춘 애니 여주인공','바닷가 마을 우체부 아가씨','심야 라디오 DJ','오키나와 민박집 사장님','신칸센 최연소 여성 기관사','도쿄 골목 베이커리 셰프'];
 function hash(s){let h=0;for(const c of s)h=(h*31+c.codePointAt(0))>>>0;return h}
 const pick=(arr,s)=>arr[hash(s)%arr.length];
 function typeLabel(t){return t==='on'?'음독':'훈독'}
 
-function offlineNames(sur,giv,exclude){
+const genderVal=()=>{const r=document.querySelector('input[name="gender"]:checked');return r?r.value:''};
+// 일본 이름 끝소리로 본 성별 느낌
+const F_END=['こ','み','え','ち','か','な','ほ','よ','り','さ','の','ね','は','ゆ','あ','め','ひめ','めぐみ','かおり','のぞみ','まどか','みどり','あや','はな','しず'];
+const M_END=['お','た','や','と','き','し','る','すけ','ひこ','ろう','へい','じ','ぞう','たか','ひろ','のり','まさ','けん','しん','しゅん','じゅん','ご','ひで','ひと','おみ','なり','てつ','いち','かず','つぐ','とし','たけ','ただ','すけ','ぞう','けい','ゆう'];
+function genderScore(k,g){if(!g)return 0;
+  const f=F_END.some(e=>k.endsWith(e)),m=M_END.some(e=>k.endsWith(e))||k.endsWith('ん');
+  if(g==='f')return (f&&!m?1.8:f?.4:0)-(m&&!f?2.6:0);
+  return (m&&!f?1.2:m?.3:0)-(f&&!m?2.6:0)}
+function offlineNames(sur,giv,exclude,gender){
   exclude=exclude||new Set();
   const sOpts=sur.entry.readings.map(x=>({k:x.k,t:x.t==='훈'?'kun':'on'}));
   const charOpts=giv.map(g=>{const e=g.entry;const o=[];e.on.forEach(k=>o.push({k,t:'on'}));e.kun.forEach(k=>o.push({k,t:'kun'}));return o});
@@ -812,6 +834,7 @@ function offlineNames(sur,giv,exclude){
       if(a.k===b.k)s-=2;}
     s+=(m>=3&&m<=4)?.6:m===2?.2:m===5?-.8:m>=6?-2:-.6;
     if(so.t==='kun')s+=.5; if(mora(so.k)===1)s-=.2;
+    s+=genderScore(gk,gender);
     out.push({sk:so.k,st:so.t,parts:c.map(x=>x.k),types:c.map(x=>x.t),score:s});
   }
   out.sort((x,y)=>y.score-x.score);
@@ -828,7 +851,8 @@ function offlineNames(sur,giv,exclude){
     else if(kind==='oo')meaning=`${hs[0]}${josa(hunOf(giv[0].kr),'와','과')} ${hs[1]}${josa(hunOf(giv[1].kr),'를','을')} 소리 그대로 읽어 단단하게 울리는 이름이에요.`;
     else if(kind==='kk')meaning=`${hs[0]}${josa(hunOf(giv[0].kr),'와','과')} ${hs[1]}${josa(hunOf(giv[1].kr),'를','을')} 일본 고유어 뜻으로 풀어 읽은 부드러운 이름이에요.`;
     else meaning=`${hs[0]}${josa(hunOf(giv[0].kr),'는','은')} ${typeLabel(o.types[0])}, ${hs[1]}${josa(hunOf(giv[1].kr),'는','은')} ${typeLabel(o.types[1])}으로 섞어 읽은 이름이에요.`;
-    return {sk:o.sk,stype:typeLabel(o.st),parts:o.parts,gtype:gt,meaning,vibe:pick(VIBES[kind],o.sk+o.parts.join(''))};
+    const vl=gender==='f'?VIBES_F:gender==='m'?VIBES_M:VIBES[kind];
+    return {sk:o.sk,stype:typeLabel(o.st),parts:o.parts,gtype:gt,meaning,vibe:pick(vl,o.sk+o.parts.join(''))};
   });
 }
 
@@ -921,7 +945,8 @@ async function submit(e,opts){
   const sur=resolve($('#f-sur').value,SUR);const g1=resolve($('#f-g1').value,GIV);const g2=resolve($('#f-g2').value,GIV);
   const giv=[g1,g2].filter(Boolean);
   if(!sur||!giv.length){showError('성과 이름 첫 글자는 꼭 적어 주세요.');return}
-  try{localStorage.setItem('jpname-last',JSON.stringify([$('#f-sur').value,$('#f-g1').value,$('#f-g2').value]))}catch(_){}
+  const gender=genderVal();
+  try{localStorage.setItem('jpname-last',JSON.stringify([$('#f-sur').value,$('#f-g1').value,$('#f-g2').value,gender]))}catch(_){}
   const allLocal=sur.entry&&giv.every(g=>g.entry);
   const notes=[];
   [sur,...giv].forEach((x,idx)=>{if(x.guessed&&x.alts.length){notes.push(`<span>「${esc(x.raw)}」은 <b lang="ja">${esc(x.kanji)}</b>(${esc(x.kr)})로 읽었어요. 다른 글자라면:</span>`+x.alts.map(a=>`<button type="button" data-fix="${idx}" data-val="${esc(a.kr)}" lang="ja" title="${esc(a.kr)}">${esc(a.jp)}</button>`).join(''))}});
@@ -930,7 +955,7 @@ async function submit(e,opts){
   if(aiOK){
     showThinking();$('#go').disabled=true;currentCtl=new AbortController();
     try{
-      const payload={sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr,raw:g.raw})),fresh:!!opts.fresh,exclude:opts.exclude||[]};
+      const payload={sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr,raw:g.raw})),fresh:!!opts.fresh,exclude:opts.exclude||[],gender};
       let timedOut=false;const tmo=setTimeout(()=>{timedOut=true;currentCtl&&currentCtl.abort()},45000);
       const resp=await fetch('/api/name',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:currentCtl.signal}).finally(()=>clearTimeout(tmo));
       const d=await resp.json().catch(()=>null);
@@ -939,7 +964,7 @@ async function submit(e,opts){
       const names=validAI(d,giv.length);
       if(!names)throw {code:'invalid_json'};
       if(names.length<3&&allLocal){const seen=new Set(names.map(n=>n.sk+'|'+n.parts.join('')));
-        for(const n of offlineNames(sur,giv,new Set(opts.exclude||[]))){if(names.length>=3)break;const k=n.sk+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
+        for(const n of offlineNames(sur,giv,new Set(opts.exclude||[]),gender)){if(names.length>=3)break;const k=n.sk+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
       const fix=(x,a)=>({kanji:(a&&a.kanji&&HAN.test(a.kanji))?a.kanji:x.kanji,kr:(a&&a.kr)||x.kr});
       const rs=fix(sur,d.surname),rg=giv.map((g,i)=>fix(g,d.given&&d.given[i]));
       if(d.note)notes.push(esc(d.note));
@@ -958,7 +983,7 @@ async function submit(e,opts){
   }else if(!allLocal){
     showError('사전에 없는 글자가 있어요. 지금은 AI 작명이 쉬는 중이라 사전에 있는 글자만 지을 수 있어요. 한자를 직접 넣거나 다른 훈음으로 적어 보세요.');return;
   }
-  render({source:'dict',kname:kn,sur:{kanji:sur.kanji,kr:sur.kr},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr})),names:offlineNames(sur,giv,new Set(opts.exclude||[])),notes});
+  render({source:'dict',kname:kn,sur:{kanji:sur.kanji,kr:sur.kr},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr})),names:offlineNames(sur,giv,new Set(opts.exclude||[]),gender),notes});
   updateShareState();
 }
 
@@ -1146,7 +1171,7 @@ $('#results').addEventListener('click',e=>{
 document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
 $('#dl-sur').innerHTML=SUR.map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
 $('#dl-giv').innerHTML=GIV.filter(d=>d.c===d.jp||!GIV.some(o=>o!==d&&o.c===d.jp)).map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
-try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||''}}catch(_){}
+try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||'';const gr=document.querySelector(`input[name="gender"][value="${last[3]||''}"]`);if(gr)gr.checked=true}}catch(_){}
 initAds();
 render(EXAMPLE);updateHints();
 
