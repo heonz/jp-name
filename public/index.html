@@ -149,6 +149,7 @@ footer .ver{opacity:.6}
 .ad-box{display:flex;justify-content:center;align-items:center;max-width:100%;overflow:hidden}
 .ad-preview .ad-box{border:1.5px dashed var(--muted);border-radius:6px;color:var(--muted);font-size:13px;background:repeating-linear-gradient(45deg,transparent 0 10px,var(--chip) 10px 20px)}
 .runner .act{display:flex;flex-direction:column;gap:6px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));max-width:min(92vw,460px);background:var(--ink);color:var(--paper);font-size:14px;padding:12px 16px;border-radius:10px;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .btn.kakao{background:#FEE500;color:#191600;border-color:#FEE500}
 .sns{display:flex;flex-wrap:wrap;gap:6px}
 .sns a,.sns button{font:500 13px var(--f-body);color:var(--ink);background:var(--chip);border:0;border-radius:99px;padding:6px 12px;text-decoration:none;cursor:pointer}
@@ -233,7 +234,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v9</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v10</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -1074,14 +1075,29 @@ function shareURL(){
   return location.origin+'/';
 }
 function kakaoShare(i){
-  if(!kakaoReady||!window.Kakao)return;
+  if(!kakaoReady||!window.Kakao){systemShare(i);return}
   const n=current.names[i];const v=nameView(current,n);const url=shareURL();
   try{
     Kakao.Share.sendDefault({objectType:'feed',
       content:{title:`내 일본 이름은 ${v.hangul}`,description:`${v.kanji} (${v.kana}) · ${n.vibe}`,imageUrl:location.origin+'/og.png',link:{mobileWebUrl:url,webUrl:url}},
       buttons:[{title:'결과 보기',link:{mobileWebUrl:url,webUrl:url}},{title:'내 이름도 해보기',link:{mobileWebUrl:location.origin+'/',webUrl:location.origin+'/'}}]});
-  }catch(e){$('#share-msg')&&($('#share-msg').textContent='카카오톡 공유를 열지 못했어요. 링크 복사를 써 주세요.')}
+  }catch(e){
+    const why=(e&&(e.message||e.code))||'알 수 없는 오류';
+    toast('카카오톡 공유를 열지 못했어요 ('+why+'). 다른 방법으로 공유할게요.');
+    systemShare(i);
+  }
 }
+// 휴대폰 공유창(카카오톡·인스타 등 앱 목록) → 안 되면 링크 복사
+async function systemShare(i){
+  const n=current.names[i];const v=nameView(current,n);const url=shareURL();
+  const text=`내 일본 이름은 ${v.kanji}(${v.kana}), ${v.hangul}! 캐릭터 설정: ${n.vibe}`;
+  if(navigator.share){try{await navigator.share({text,url});return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(text+'\n'+url);toast('링크를 복사했어요. 카카오톡 대화방에 붙여넣기 하세요.')}
+  catch(_){openShare(i)}
+}
+let toastTimer=null;
+function toast(msg){let t=$('#toast');if(!t){t=document.createElement('div');t.id='toast';t.setAttribute('role','status');document.body.appendChild(t)}
+  t.textContent=msg;t.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{t.hidden=true},4500)}
 if(KAKAO_JS_KEY){
   const sc=document.createElement('script');sc.src=KAKAO_SDK;sc.crossOrigin='anonymous';sc.async=true;
   sc.onload=()=>{try{if(!Kakao.isInitialized())Kakao.init(KAKAO_JS_KEY);kakaoReady=Kakao.isInitialized();if(kakaoReady&&current)render(current)}catch(_){}};
