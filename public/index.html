@@ -102,6 +102,7 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .runner .r1 span{color:var(--muted);font-weight:500;margin-left:6px}
 .runner .meaning,.runner .vibe{font-size:13px}
 .pick-hint{margin:0;font-size:13px;color:var(--muted)}
+.pick-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
 .trip{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px}
 .trip .t-eyebrow{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:600}
 .trip h3{margin:0;font-family:var(--f-display);font-size:24px;line-height:1.3;text-wrap:balance}
@@ -782,7 +783,8 @@ function hash(s){let h=0;for(const c of s)h=(h*31+c.codePointAt(0))>>>0;return h
 const pick=(arr,s)=>arr[hash(s)%arr.length];
 function typeLabel(t){return t==='on'?'음독':'훈독'}
 
-function offlineNames(sur,giv){
+function offlineNames(sur,giv,exclude){
+  exclude=exclude||new Set();
   const sOpts=sur.entry.readings.map(x=>({k:x.k,t:x.t==='훈'?'kun':'on'}));
   const charOpts=giv.map(g=>{const e=g.entry;const o=[];e.on.forEach(k=>o.push({k,t:'on'}));e.kun.forEach(k=>o.push({k,t:'kun'}));return o});
   let combos=[];
@@ -804,7 +806,7 @@ function offlineNames(sur,giv){
   out.sort((x,y)=>y.score-x.score);
   const chosen=[],seen=new Set(),gcount={};
   for(const o of out){const key=o.sk+'|'+o.parts.join('');const g=o.parts.join('');
-    if(seen.has(key)||(gcount[g]||0)>=2)continue;seen.add(key);gcount[g]=(gcount[g]||0)+1;chosen.push(o);if(chosen.length===3)break}
+    if(seen.has(key)||exclude.has(key)||(gcount[g]||0)>=2)continue;seen.add(key);gcount[g]=(gcount[g]||0)+1;chosen.push(o);if(chosen.length===3)break}
   for(const o of out){if(chosen.length>=3)break;const key=o.sk+'|'+o.parts.join('');if(!seen.has(key)){seen.add(key);chosen.push(o)}}
   return chosen.map(o=>{
     const gt=o.types.map(typeLabel).join('+');
@@ -865,7 +867,7 @@ function render(res){
       <p class="vibe">${esc(a.vibe)}</p>
       <div class="acts"><button class="btn small kakao" type="button" data-kakao="${sel}" ${kakaoReady?'':'hidden'}>카톡으로 보내기</button><button class="btn small" type="button" data-share="${sel}">공유 카드 만들기</button></div>
     </div></article>`;
-  if(res.names.length>1)html+=`<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>`;
+  html+=`<div class="pick-row">${res.names.length>1?'<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>':''}<button class="btn small ghost" type="button" data-regen>다른 이름 3개 더 보기</button></div>`;
   $('#res-main').innerHTML=html;
   let rest='';
   res.names.forEach((n,i)=>{if(i===sel)return;const v=nameView(res,n);rest+=`<article class="runner">
@@ -901,8 +903,8 @@ function updateHints(){
     else el.textContent=aiOK?'사전에 없어요 · AI가 찾아볼게요':'사전에 없어요 · 한자를 직접 넣어 주세요';
   });
 }
-async function submit(e){
-  e&&e.preventDefault();
+async function submit(e,opts){
+  e&&e.preventDefault&&e.preventDefault();opts=opts||{};
   const sur=resolve($('#f-sur').value,SUR);const g1=resolve($('#f-g1').value,GIV);const g2=resolve($('#f-g2').value,GIV);
   const giv=[g1,g2].filter(Boolean);
   if(!sur||!giv.length){showError('성과 이름 첫 글자는 꼭 적어 주세요.');return}
@@ -915,7 +917,7 @@ async function submit(e){
   if(aiOK){
     showThinking();$('#go').disabled=true;currentCtl=new AbortController();
     try{
-      const payload={sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr,raw:g.raw}))};
+      const payload={sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr,raw:g.raw})),fresh:!!opts.fresh,exclude:opts.exclude||[]};
       let timedOut=false;const tmo=setTimeout(()=>{timedOut=true;currentCtl&&currentCtl.abort()},45000);
       const resp=await fetch('/api/name',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:currentCtl.signal}).finally(()=>clearTimeout(tmo));
       const d=await resp.json().catch(()=>null);
@@ -924,12 +926,12 @@ async function submit(e){
       const names=validAI(d,giv.length);
       if(!names)throw {code:'invalid_json'};
       if(names.length<3&&allLocal){const seen=new Set(names.map(n=>n.sk+'|'+n.parts.join('')));
-        for(const n of offlineNames(sur,giv)){if(names.length>=3)break;const k=n.sk+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
+        for(const n of offlineNames(sur,giv,new Set(opts.exclude||[]))){if(names.length>=3)break;const k=n.sk+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
       const fix=(x,a)=>({kanji:(a&&a.kanji&&HAN.test(a.kanji))?a.kanji:x.kanji,kr:(a&&a.kr)||x.kr});
       const rs=fix(sur,d.surname),rg=giv.map((g,i)=>fix(g,d.given&&d.given[i]));
       if(d.note)notes.push(esc(d.note));
       const kn2=kName([rs,...rg].map((x,i)=>x.kr?eumOf(x.kr):[...kn][i]));
-      render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});setShareURL(rs.kanji,rg.map(x=>x.kanji).join(''));
+      render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});updateShareState();
       return;
     }catch(err){
       const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
@@ -943,8 +945,8 @@ async function submit(e){
   }else if(!allLocal){
     showError('사전에 없는 글자가 있어요. 지금은 AI 작명이 쉬는 중이라 사전에 있는 글자만 지을 수 있어요. 한자를 직접 넣거나 다른 훈음으로 적어 보세요.');return;
   }
-  setShareURL(sur.kanji,giv.map(g=>g.kanji).join(''));
-  render({source:'dict',kname:kn,sur:{kanji:sur.kanji,kr:sur.kr},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr})),names:offlineNames(sur,giv),notes});
+  render({source:'dict',kname:kn,sur:{kanji:sur.kanji,kr:sur.kr},giv:giv.map(g=>({kanji:g.kanji,kr:g.kr})),names:offlineNames(sur,giv,new Set(opts.exclude||[])),notes});
+  updateShareState();
 }
 
 /* ---------- Share card (canvas) ---------- */
@@ -1029,7 +1031,7 @@ const KAKAO_SDK='https://t1.kakaocdn.net/kakao_js_sdk/2.8.4/kakao.min.js';
 const IN_APP=/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|everytimeApp/i.test(navigator.userAgent);
 let kakaoReady=false;
 function shareURL(){
-  if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));if(current.sel)u.searchParams.set('p',String(current.sel));return u.toString()}
+  if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));if(current.sel)u.searchParams.set('p',String(current.sel));if(current.packed)u.searchParams.set('r',current.packed);return u.toString()}
   return location.origin+'/';
 }
 function kakaoShare(i){
@@ -1122,7 +1124,8 @@ $('#form').addEventListener('submit',submit);
 $('#results').addEventListener('click',e=>{
   const s=e.target.closest('[data-share]');if(s){openShare(+s.dataset.share);return}
   const k=e.target.closest('[data-kakao]');if(k){kakaoShare(+k.dataset.kakao);return}
-  const pk=e.target.closest('[data-pick]');if(pk&&current){current.sel=+pk.dataset.pick;render(current);if(current.source!=='example')setShareURL(current.sur.kanji,current.giv.map(g=>g.kanji).join(''));$('#res-main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
+  const rg=e.target.closest('[data-regen]');if(rg&&current){if(current.source==='example'){submit(null,{fresh:true});return}fillForm(current);submit(null,{fresh:true,exclude:current.names.map(n=>n.sk+'|'+n.parts.join(''))});return}
+  const pk=e.target.closest('[data-pick]');if(pk&&current){current.sel=+pk.dataset.pick;render(current);if(current.source!=='example')updateShareState();$('#res-main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
   const f=e.target.closest('[data-fix]');if(f){const ids=['f-sur','f-g1','f-g2'];const idx=+f.dataset.fix;$('#'+ids[idx]).value=f.dataset.val;updateHints();submit()}
 });
 document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
@@ -1132,9 +1135,42 @@ try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.
 initAds();
 render(EXAMPLE);updateHints();
 
-function setShareURL(sk,gk){try{const u=new URL(location.href);u.searchParams.set('s',sk);u.searchParams.set('g',gk);if(current&&current.sel)u.searchParams.set('p',String(current.sel));else u.searchParams.delete('p');history.replaceState(null,'',u)}catch(_){}}
+/* ---------- 결과를 링크에 담기: 받은 사람은 AI 호출 없이 똑같은 결과를 봐요 ---------- */
+const b64u={enc:b=>{let s='';b.forEach(c=>s+=String.fromCharCode(c));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')},
+  dec:t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');while(t.length%4)t+='=';const s=atob(t);return Uint8Array.from(s,c=>c.charCodeAt(0))}};
+async function zip(bytes,mode){const cs=mode==='c'?new CompressionStream('deflate-raw'):new DecompressionStream('deflate-raw');const st=new Blob([bytes]).stream().pipeThrough(cs);return new Uint8Array(await new Response(st).arrayBuffer())}
+async function packResult(res){
+  const o={k:res.kname,a:res.source==='ai'?1:0,s:[res.sur.kanji,res.sur.kr],g:res.giv.map(x=>[x.kanji,x.kr]),n:res.names.map(n=>[n.sk,n.stype,n.parts,n.gtype,n.meaning,n.vibe])};
+  const raw=new TextEncoder().encode(JSON.stringify(o));
+  try{if(window.CompressionStream)return 'z'+b64u.enc(await zip(raw,'c'))}catch(_){}
+  return 'j'+b64u.enc(raw);
+}
+async function unpackResult(t){
+  try{
+    if(!t||t.length>4000)return null;
+    let bytes=b64u.dec(t.slice(1));if(t[0]==='z')bytes=await zip(bytes,'d');else if(t[0]!=='j')return null;
+    const o=JSON.parse(new TextDecoder().decode(bytes));
+    const str=(v,m)=>typeof v==='string'?v.slice(0,m):'';const KR=/^[ぁ-ゖー]{1,12}$/;
+    const one=v=>Array.isArray(v)&&typeof v[0]==='string'&&HAN.test(v[0])?{kanji:[...v[0]][0],kr:str(v[1],12)}:null;
+    const sur=one(o.s);const giv=(Array.isArray(o.g)?o.g:[]).slice(0,2).map(one);
+    if(!sur||!giv.length||giv.some(x=>!x))return null;
+    const names=(Array.isArray(o.n)?o.n:[]).slice(0,3).map(x=>Array.isArray(x)&&KR.test(x[0]||'')&&Array.isArray(x[2])&&x[2].length===giv.length&&x[2].every(p=>KR.test(p||''))?
+      {sk:x[0],stype:str(x[1],12),parts:x[2],gtype:str(x[3],20),meaning:str(x[4],80),vibe:str(x[5],40)}:null).filter(Boolean);
+    if(!names.length)return null;
+    const kname=/^[가-힣]{1,6}$/.test(o.k||'')?o.k:'';
+    return {source:o.a?'ai':'dict',kname:kname||'내 이름',sur,giv,names,notes:[]};
+  }catch(_){return null}
+}
+async function updateShareState(){
+  const res=current;if(!res||res.source==='example')return;
+  try{res.packed=await packResult(res)}catch(_){res.packed=''}
+  if(res!==current)return;
+  try{const u=new URL(location.href);u.search='';u.searchParams.set('s',res.sur.kanji);u.searchParams.set('g',res.giv.map(g=>g.kanji).join(''));if(res.sel)u.searchParams.set('p',String(res.sel));if(res.packed)u.searchParams.set('r',res.packed);history.replaceState(null,'',u)}catch(_){}
+}
+function fillForm(res){$('#f-sur').value=res.sur.kanji;$('#f-g1').value=res.giv[0]?res.giv[0].kanji:'';$('#f-g2').value=res.giv[1]?res.giv[1].kanji:'';updateHints()}
 setStatus('on');
-(()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g');
+(async()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g'),r=p.get('r');
+  if(r){const res=await unpackResult(r);if(res){fillForm(res);render(res);res.packed=r;return}}
   if(sk&&gk&&HAN.test(sk)){const gs=[...gk].filter(c=>HAN.test(c)).slice(0,2);$('#f-sur').value=[...sk][0];$('#f-g1').value=gs[0]||'';$('#f-g2').value=gs[1]||'';updateHints();submit()}})();
 </script>
 

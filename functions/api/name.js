@@ -1,5 +1,6 @@
 // POST /api/name
 // 입력: { sur: {kanji, kr, raw}, giv: [{kanji, kr, raw}, ...] }
+// 입력(선택): fresh: true 이면 저장된 결과를 쓰지 않고 새로 지음, exclude: ["かわ|けんしん", ...] 피할 읽기
 // 출력: { surname, given, names: [...3개], note, cached }
 //
 // 필요한 설정 (Cloudflare Worker > Settings > Variables and Secrets)
@@ -14,7 +15,11 @@
 
 const HAN = /\p{Script=Han}/u;
 const KANA = /^[ぁ-ゖー]+$/;
-const CACHE_VERSION = "v2";
+const CACHE_VERSION = "v3";
+// 같은 한자 조합에 대해 서로 다른 결과를 몇 개까지 모아둘지.
+// 이 개수가 찰 때까지는 매번 새로 지어서(동명이인도 다른 이름), 다 차면 그중 하나를 무작위로 보여줘요.
+const VARIANTS = 4;
+const MAX_STORED = 8;
 
 function clean(s, max = 20) {
   return String(s ?? "").replace(/[\u0000-\u001f<>{}`$\\"]/g, "").trim().slice(0, max);
@@ -39,7 +44,7 @@ function part(x) {
   return out;
 }
 
-function buildPrompt(sur, giv) {
+function buildPrompt(sur, giv, avoid) {
   const desc = (x) =>
     x.kanji ? `${x.kanji}${x.kr ? ` (${x.kr})` : ""}` : `"${x.raw}" (한국어 훈음 설명. 인명용 한자 하나로 확정할 것)`;
   return `너는 한국 사람 이름의 한자를 일본식으로 읽어서 '재미로' 일본 이름을 지어주는 작명가야.
@@ -58,6 +63,8 @@ function buildPrompt(sur, giv) {
 7. 한자는 일본 신자체로 적는다(예: 眞→真). kr에는 한국 훈음(예: "참 진").
 8. note에는 훈음이 애매해서 한자를 추측했을 때만 한국어로 짧게 적는다.
 
+${avoid && avoid.length ? `9. 다음 조합은 이미 보여준 것이라 되도록 피하고 다른 읽기·다른 캐릭터 설정을 써: ${avoid.join(", ")}
+` : ""}
 give_names 도구로 답해.`;
 }
 
@@ -162,19 +169,27 @@ export async function onRequestPost({ request, env }) {
   const kv = env.NAMES;
   const key = CACHE_VERSION + ":" + [sur, ...giv].map((x) => x.kanji || "raw:" + x.raw).join("|");
 
-  // 1) 캐시: 같은 한자 조합은 AI를 다시 부르지 않음
+  const fresh = body.fresh === true;
+  const exclude = (Array.isArray(body.exclude) ? body.exclude : []).slice(0, 12).map((x) => clean(x, 30)).filter(Boolean);
+
+  // 1) 저장된 결과들: 같은 한자 조합이어도 여러 버전을 모아두고 골고루 보여줌
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const cacheReq = new Request("https://cache.jp-name.internal/" + encodeURIComponent(key));
+  let stored = { variants: [] };
   try {
-    if (cache) {
-      const c = await cache.match(cacheReq);
-      if (c) return json({ ...(await c.json()), cached: true });
-    }
-    if (kv) {
-      const hit = await kv.get(key, "json");
-      if (hit) return json({ ...hit, cached: true });
-    }
+    let hit = null;
+    if (cache) { const c = await cache.match(cacheReq); if (c) hit = await c.json(); }
+    if (!hit && kv) hit = await kv.get(key, "json");
+    if (hit && Array.isArray(hit.variants)) stored = hit;
   } catch (_) {}
+  if (!fresh && stored.variants.length >= VARIANTS) {
+    const pick = stored.variants[Math.floor(Math.random() * stored.variants.length)];
+    return json({ ...pick, cached: true });
+  }
+  const avoid = [...new Set([
+    ...exclude,
+    ...stored.variants.flatMap((v) => v.names.map((x) => x.surname_kana + "|" + x.given_parts.join(""))),
+  ])].slice(0, 15);
 
   if (kv) {
     try {
@@ -232,13 +247,13 @@ export async function onRequestPost({ request, env }) {
   let result = null;
   try {
     for (let i = 0; i < 2 && !result; i++) {
-      const v = validate(await ask(buildPrompt(sur, giv)), n);
+      const v = validate(await ask(buildPrompt(sur, giv, avoid)), n);
       if (v.why) console.log(`[name] ${label} dropped: ${v.why}`);
       result = v.result;
     }
     if (result && result.names.length < 3) {
       const have = result.names.map((x) => x.surname_kana + " " + x.given_parts.join("")).join(", ");
-      const v = validate(await ask(buildPrompt(sur, giv) +
+      const v = validate(await ask(buildPrompt(sur, giv, avoid) +
         `\n\n이미 나온 이름: ${have}. 이것과 겹치지 않는 다른 읽기 조합을 더해서 names를 3개 채워.`), n);
       if (v.result) {
         const seen = new Set(result.names.map((x) => x.surname_kana + x.given_parts.join("")));
@@ -259,12 +274,15 @@ export async function onRequestPost({ request, env }) {
   if (result.names.length < 3) return json({ ...result, cached: false }); // 3개 미만은 캐시하지 않음
 
   try {
+    stored.variants.push(result);
+    if (stored.variants.length > MAX_STORED) stored.variants = stored.variants.slice(-MAX_STORED);
+    const body = JSON.stringify(stored);
     if (cache) {
-      await cache.put(cacheReq, new Response(JSON.stringify(result), {
+      await cache.put(cacheReq, new Response(body, {
         headers: { "content-type": "application/json", "cache-control": "public, max-age=2592000" },
       }));
     }
-    if (kv) await kv.put(key, JSON.stringify(result), { expirationTtl: 60 * 60 * 24 * 30 });
+    if (kv) await kv.put(key, body, { expirationTtl: 60 * 60 * 24 * 30 });
   } catch (_) {}
   return json({ ...result, cached: false });
 }
