@@ -4,7 +4,7 @@
 // 나머지 주소 : public 폴더의 파일
 import { onRequestPost } from "../functions/api/name.js";
 
-const VERSION = "v12";
+const VERSION = "v14";
 const json = (b, status = 200) =>
   new Response(JSON.stringify(b, null, 2), {
     status,

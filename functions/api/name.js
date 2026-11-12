@@ -1,6 +1,8 @@
 // POST /api/name
 // 입력: { sur: {kanji, kr, raw}, giv: [{kanji, kr, raw}, ...] }
 // 입력(선택): fresh: true 이면 저장된 결과를 쓰지 않고 새로 지음, exclude: ["かわ|けんしん", ...] 피할 읽기
+// 순우리말 이름: { mode: "native", sur: {...}, native: { name: "예솔", meaning: "예쁜 소나무" } }
+//   → 이름의 뜻을 한자로 옮긴 일본 이름. names[].given_kanji 에 이름별 한자가 들어 있음
 // 출력: { surname, given, names: [...3개], note, cached }
 //
 // 필요한 설정 (Cloudflare Worker > Settings > Variables and Secrets)
@@ -16,6 +18,8 @@
 const HAN = /\p{Script=Han}/u;
 const KANA = /^[ぁ-ゖー]+$/;
 const CACHE_VERSION = "v5";
+const HAN_CHUNK = /^[\p{Script=Han}々]{1,3}$/u;
+const HANGUL_NAME = /^[가-힣\p{Script=Han}]{1,5}$/u;
 // 같은 한자 조합에 대해 서로 다른 결과를 몇 개까지 모아둘지.
 // 이 개수가 찰 때까지는 매번 새로 지어서(동명이인도 다른 이름), 다 차면 그중 하나를 무작위로 보여줘요.
 const VARIANTS = 4;
@@ -72,6 +76,100 @@ ${gender === "m" ? "   - 남자 이름이어야 한다. 일본 남자 이름에 
 ${avoid && avoid.length ? `9. 다음 조합은 이미 보여준 것이라 되도록 피하고 다른 읽기·다른 캐릭터 설정을 써: ${avoid.join(", ")}
 ` : ""}
 give_names 도구로 답해.`;
+}
+
+function genderRule(gender) {
+  if (gender === "m") return "   - 남자 이름이어야 한다. 일본 남자 이름에 흔한 끝소리(~と, ~き, ~や, ~た, ~すけ, ~ひこ, ~お, ~ひろ 등)를 쓰고 여자 이름처럼 들리는 소리는 피한다. 캐릭터 설정도 남자로.\n";
+  if (gender === "f") return "   - 여자 이름이어야 한다. 일본 여자 이름에 흔한 끝소리(~こ, ~み, ~え, ~か, ~な, ~ほ, ~り, ~の 등)를 쓰고 남자 이름처럼 들리는 소리는 피한다. 캐릭터 설정도 여자로.\n";
+  return "";
+}
+
+function buildNativePrompt(sur, nat, avoid, gender) {
+  const surDesc = sur.kanji ? `${sur.kanji}${sur.kr ? ` (${sur.kr})` : ""}` : `"${sur.raw}" (한국어 훈음 설명. 인명용 한자 하나로 확정할 것)`;
+  return `너는 한국 사람의 순우리말(한자가 없는) 이름을 '재미로' 일본 이름으로 바꿔 주는 작명가야.
+
+입력
+- 성: ${surDesc}
+- 이름(순우리말, 한글): ${nat.name}
+- 이름 뜻(사용자 설명, 비어 있을 수 있음): ${nat.meaning || "(없음)"}
+${nat.fixed.length ? `- 한자가 있는 글자: ${nat.fixed.map((f) => `'${f.syl}' = ${f.kanji}${f.kr ? `(${f.kr})` : ""}`).join(", ")}. 이 글자는 반드시 그 한자를 그대로 쓰고 일본식 읽기(음독·훈독·이름용 읽기)만 고른다. 나머지 글자만 순우리말이니 뜻을 살린 한자를 고른다. 원래 이름의 글자 순서를 지킨다(예: 은샘 → 恩 + 泉).\n` : ""}
+- 성별: ${gender === "m" ? "남자" : gender === "f" ? "여자" : "정하지 않음"}
+
+규칙
+1. 성은 한자 한 글자를 그대로 유지하고, 일본어로 읽는 방법만 고른다(훈독 또는 음독). 성에 훈독이 있으면 먼저 고려한다(예: 金→かね, 林→はやし).
+2. 이름은 순우리말의 뜻을 살려서, 그 뜻을 가진 한자를 골라 실제 일본 사람이 쓰는 자연스러운 이름으로 만든다.
+   - 좋은 예: 하늘→空(そら), 나래→翼(つばさ), 샘→泉(いずみ), 보람→実(みのり), 다솜(사랑)→愛(あい), 한별→昴(すばる), 이슬→雫(しずく), 노을→茜(あかね), 바다→海斗(かいと)
+   - 여러 말이 합쳐진 이름(예: 은샘=은+샘, 예솔=예쁜+솔)은 각 부분의 뜻을 살려 한자 1~2글자로 옮긴다.
+   - 사용자가 뜻을 적었으면 그 뜻을 따른다. 뜻을 모르면 가장 그럴듯한 뜻으로 풀고, 어떻게 풀었는지 note에 한국어로 짧게 적는다.
+3. 3개 중 1개는 원래 이름과 소리가 비슷한 일본 이름이어도 좋다(예: 하나→花(はな), 아라→亜良(あら)). 그 경우 given_type을 "소리 비슷"으로, 나머지는 "뜻 옮김"으로.
+4. 한자는 일본 이름에 실제로 쓰는 글자로 1~2글자(숙자훈 포함 최대 3글자). 그 한자에 있는 읽기만 쓴다. 세 이름은 서로 달라야 한다.
+${genderRule(gender)}5. given_kanji와 given_parts는 같은 길이의 배열: 한자 덩어리마다 그 읽기(히라가나). 예: 空→["空"],["そら"] / 海斗→["海","斗"],["かい","と"] / 雲雀(숙자훈)→["雲雀"],["ひばり"]
+6. meaning: 우리말 뜻과 고른 한자를 연결해 설명하는 한국어 한 문장(40자 이내). vibe: 이 이름을 가진 일본 사람의 재미있는 캐릭터 설정, 한국어 18자 이내. 실존 인물·민족·외모 비하 금지.
+${avoid && avoid.length ? `7. 다음 조합은 이미 보여준 것이라 되도록 피하고 다른 한자·다른 캐릭터 설정을 써: ${avoid.join(", ")}\n` : ""}
+give_names 도구로 답해.`;
+}
+
+function nativeToolSchema() {
+  return {
+    name: "give_names",
+    description: "순우리말 이름의 뜻을 한자로 옮긴 일본 이름 3개를 돌려준다.",
+    input_schema: {
+      type: "object",
+      properties: {
+        surname: { type: "object", properties: { kanji: { type: "string" }, kr: { type: "string" } }, required: ["kanji", "kr"] },
+        names: {
+          type: "array", minItems: 3, maxItems: 3,
+          items: {
+            type: "object",
+            properties: {
+              surname_kana: { type: "string", description: "성의 히라가나 읽기" },
+              surname_type: { type: "string", description: "음독 / 훈독" },
+              given_kanji: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 3, description: "이름 한자 덩어리" },
+              given_parts: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 3, description: "덩어리별 히라가나 읽기" },
+              given_type: { type: "string", description: "뜻 옮김 / 소리 비슷" },
+              meaning: { type: "string" },
+              vibe: { type: "string" },
+            },
+            required: ["surname_kana", "surname_type", "given_kanji", "given_parts", "given_type", "meaning", "vibe"],
+          },
+        },
+        note: { type: "string" },
+      },
+      required: ["surname", "names"],
+    },
+  };
+}
+
+function validateNative(d, fixed) {
+  if (!d || !Array.isArray(d.names)) return { result: null, why: "no_names" };
+  const reasons = [];
+  const seen = new Set();
+  const names = [];
+  for (const x of d.names) {
+    if (!x) continue;
+    const sk = kana(x.surname_kana);
+    const gk = (Array.isArray(x.given_kanji) ? x.given_kanji : typeof x.given_kanji === "string" ? [x.given_kanji] : [])
+      .map((k) => String(k ?? "").replace(/\s/g, "")).filter(Boolean);
+    let parts = (Array.isArray(x.given_parts) ? x.given_parts : typeof x.given_parts === "string" ? [x.given_parts] : [])
+      .map(kana).filter(Boolean);
+    if (gk.length === 1 && parts.length > 1) parts = [parts.join("")];
+    if (!KANA.test(sk)) { reasons.push("surname_kana:" + x.surname_kana); continue; }
+    if (!gk.length || gk.length > 3 || !gk.every((k) => HAN_CHUNK.test(k))) { reasons.push("given_kanji:" + JSON.stringify(x.given_kanji)); continue; }
+    if (parts.length !== gk.length || !parts.every((p) => KANA.test(p))) { reasons.push("given_parts:" + JSON.stringify(x.given_parts)); continue; }
+    if (fixed && fixed.some((f) => !gk.join("").includes(f.kanji))) { reasons.push("missing_fixed:" + gk.join("")); continue; }
+    const k = sk + "|" + gk.join("") + "|" + parts.join("");
+    if (seen.has(k)) continue;
+    seen.add(k);
+    names.push({
+      surname_kana: sk, surname_type: clean(x.surname_type, 12),
+      given_kanji: gk, given_parts: parts, given_type: clean(x.given_type, 20),
+      meaning: clean(x.meaning, 80), vibe: clean(x.vibe, 40),
+    });
+    if (names.length === 3) break;
+  }
+  if (!names.length) return { result: null, why: reasons.join(" ; ") || "empty" };
+  const s = d.surname && HAN.test(d.surname.kanji || "") ? { kanji: [...d.surname.kanji][0], kr: clean(d.surname.kr, 12) } : null;
+  return { result: { surname: s, given: [], names, note: clean(d.note, 80) }, why: reasons.join(" ; ") };
 }
 
 function toolSchema(n) {
@@ -167,13 +265,28 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); } catch (_) { return json({ error: "bad_request" }, 400); }
 
   const sur = part(body.sur);
-  const giv = (Array.isArray(body.giv) ? body.giv : []).slice(0, 2).map(part).filter(Boolean);
-  if (!sur || !giv.length) return json({ error: "bad_request" }, 400);
+  const native = body.mode === "native";
+  const nat = native && body.native && typeof body.native === "object"
+    ? {
+      name: clean(body.native.name, 6).replace(/\s/g, ""),
+      meaning: clean(body.native.meaning, 30),
+      // 한자가 있는 글자 (예: 은샘의 '은' = 恩). 이 글자는 한자를 그대로 쓰고 읽기만 고름
+      fixed: (Array.isArray(body.native.fixed) ? body.native.fixed : []).slice(0, 2)
+        .map((f) => ({ syl: clean(f && f.syl, 2), kanji: [...clean(f && f.kanji, 2)][0] || "", kr: clean(f && f.kr, 12) }))
+        .filter((f) => HAN.test(f.kanji)),
+    } : null;
+  const giv = native ? [] : (Array.isArray(body.giv) ? body.giv : []).slice(0, 2).map(part).filter(Boolean);
+  if (!sur) return json({ error: "bad_request" }, 400);
+  if (native ? !(nat && HANGUL_NAME.test(nat.name)) : !giv.length) return json({ error: "bad_request" }, 400);
   const n = giv.length;
-  const label = [sur, ...giv].map((x) => x.kanji || x.raw).join("");
+  const label = (sur.kanji || sur.raw) + (native ? nat.name : giv.map((x) => x.kanji || x.raw).join(""));
 
   const kv = env.NAMES;
-  const key = CACHE_VERSION + ":" + (["m", "f"].includes(body.gender) ? body.gender : "n") + ":" + [sur, ...giv].map((x) => x.kanji || "raw:" + x.raw).join("|");
+  const gkey = ["m", "f"].includes(body.gender) ? body.gender : "n";
+  const key = CACHE_VERSION + ":" + gkey + ":" + (native
+    ? "native:" + (sur.kanji || "raw:" + sur.raw) + "|" + nat.name + "|" + nat.meaning + "|" + nat.fixed.map((f) => f.kanji).join("")
+    : [sur, ...giv].map((x) => x.kanji || "raw:" + x.raw).join("|"));
+  const nameKey = (x) => x.surname_kana + "|" + (x.given_kanji ? x.given_kanji.join("") + "|" : "") + x.given_parts.join("");
 
   const fresh = body.fresh === true;
   const gender = body.gender === "m" || body.gender === "f" ? body.gender : "";
@@ -195,7 +308,7 @@ export async function onRequestPost({ request, env }) {
   }
   const avoid = [...new Set([
     ...exclude,
-    ...stored.variants.flatMap((v) => v.names.map((x) => x.surname_kana + "|" + x.given_parts.join(""))),
+    ...stored.variants.flatMap((v) => v.names.map((x) => x.surname_kana + "|" + (x.given_kanji ? x.given_kanji.join("") + "|" : "") + x.given_parts.join(""))),
   ])].slice(0, 15);
 
   if (kv) {
@@ -231,7 +344,7 @@ export async function onRequestPost({ request, env }) {
         body: JSON.stringify({
           model: env.MODEL || "claude-haiku-5-5",
           max_tokens: 1600,
-          tools: [toolSchema(n)],
+          tools: [native ? nativeToolSchema() : toolSchema(n)],
           tool_choice: { type: "tool", name: "give_names" },
           messages: [{ role: "user", content: prompt }],
         }),
@@ -253,19 +366,21 @@ export async function onRequestPost({ request, env }) {
 
   let result = null;
   try {
+    const prompt = () => native ? buildNativePrompt(sur, nat, avoid, gender) : buildPrompt(sur, giv, avoid, gender);
+    const check = (d) => native ? validateNative(d, nat.fixed) : validate(d, n);
     for (let i = 0; i < 2 && !result; i++) {
-      const v = validate(await ask(buildPrompt(sur, giv, avoid, gender)), n);
+      const v = check(await ask(prompt()));
       if (v.why) console.log(`[name] ${label} dropped: ${v.why}`);
       result = v.result;
     }
     if (result && result.names.length < 3) {
-      const have = result.names.map((x) => x.surname_kana + " " + x.given_parts.join("")).join(", ");
-      const v = validate(await ask(buildPrompt(sur, giv, avoid, gender) +
-        `\n\n이미 나온 이름: ${have}. 이것과 겹치지 않는 다른 읽기 조합을 더해서 names를 3개 채워.`), n);
+      const have = result.names.map(nameKey).join(", ");
+      const v = check(await ask(prompt() +
+        `\n\n이미 나온 이름: ${have}. 이것과 겹치지 않는 다른 조합을 더해서 names를 3개 채워.`));
       if (v.result) {
-        const seen = new Set(result.names.map((x) => x.surname_kana + x.given_parts.join("")));
+        const seen = new Set(result.names.map(nameKey));
         for (const x of v.result.names) {
-          const k = x.surname_kana + x.given_parts.join("");
+          const k = nameKey(x);
           if (result.names.length < 3 && !seen.has(k)) { seen.add(k); result.names.push(x); }
         }
       }

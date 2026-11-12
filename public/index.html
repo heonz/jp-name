@@ -60,6 +60,11 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .field input:focus{outline:2px solid var(--indigo);outline-offset:1px;border-color:transparent}
 .field .hint{font-size:12px;color:var(--muted);min-height:1.2em}
 .field .hint .hfix{font:600 14px var(--f-display);background:var(--chip);color:var(--ink);border:0;border-radius:4px;padding:1px 7px;margin:2px 4px 0 0;cursor:pointer}
+.lab-row{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.lab-row label:first-child{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:500}
+.nat-tog{display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.nat-tog input{accent-color:var(--ink);margin:0}
+.field.is-nat input[type=text],.field.is-nat input:not([type]){border-style:dashed}
 .field .hint b{font-family:var(--f-display);font-size:15px;color:var(--ink)}
 .actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px}
 .gender{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
@@ -183,25 +188,40 @@ footer .ver{opacity:.6}
   <header>
     <div class="eyebrow">한자 → 일본식 읽기 · 재미로 짓는 이름</div>
     <h1><a class="home" href="/" title="처음으로">내 이름, <span class="ja">일본</span>에선 뭐라고 읽을까?</a></h1>
-    <p class="lede">이름 한자를 훈음으로 적어 주세요. 성은 한자 그대로 두고 읽는 법만 바꾸고, 이름은 음독·훈독을 섞어 일본 이름답게 세 가지를 추천 순으로 지어 드려요.</p>
+    <p class="lede">이름 한자를 훈음으로 적어 주세요. 성은 한자 그대로 두고 읽는 법만 바꾸고, 이름은 음독·훈독을 섞어 일본 이름답게 세 가지를 추천 순으로 지어 드려요. 한자가 없는 순우리말 이름은 뜻을 살려 지어 드려요.</p>
   </header>
 
   <form id="form" autocomplete="off">
+    <div class="gender nmode" role="radiogroup" aria-label="이름 종류">
+      <span class="g-label">내 이름은</span>
+      <input type="radio" name="nmode" id="m-han" value="han" checked><label for="m-han">한자 이름</label>
+      <input type="radio" name="nmode" id="m-native" value="native"><label for="m-native">순우리말 이름</label>
+    </div>
     <div class="fields">
       <div class="field">
         <label for="f-sur">성</label>
         <input id="f-sur" list="dl-sur" placeholder="성 홍">
         <div class="hint" id="h-sur"></div>
       </div>
-      <div class="field">
-        <label for="f-g1">이름 첫 글자</label>
+      <div class="field han-only">
+        <div class="lab-row"><label for="f-g1">이름 첫 글자</label><label class="nat-tog"><input type="checkbox" id="n-g1">순우리말</label></div>
         <input id="f-g1" list="dl-giv" placeholder="길할 길">
         <div class="hint" id="h-g1"></div>
       </div>
-      <div class="field">
-        <label for="f-g2">이름 둘째 글자 (외자면 비우기)</label>
+      <div class="field han-only">
+        <div class="lab-row"><label for="f-g2">이름 둘째 글자 (외자면 비우기)</label><label class="nat-tog"><input type="checkbox" id="n-g2">순우리말</label></div>
         <input id="f-g2" list="dl-giv" placeholder="한가지 동">
         <div class="hint" id="h-g2"></div>
+      </div>
+      <div class="field native-only" hidden>
+        <label for="f-native">이름 (한글 그대로)</label>
+        <input id="f-native" placeholder="예솔" maxlength="5">
+        <div class="hint" id="h-native"></div>
+      </div>
+      <div class="field native-only" hidden>
+        <label for="f-mean">이름 뜻 (모르면 비우기)</label>
+        <input id="f-mean" placeholder="예: 예쁜 소나무" maxlength="30">
+        <div class="hint" id="h-mean">적어 주면 그 뜻으로 지어요</div>
       </div>
     </div>
     <div class="gender" role="radiogroup" aria-label="성별">
@@ -217,6 +237,8 @@ footer .ver{opacity:.6}
     <div class="example-row">다른 예시로 해보기
       <button type="button" data-ex="수풀 림|빼어날 수|참 진">임수진</button>
       <button type="button" data-ex="성 윤|슬기 지|넓을 호">윤지호</button>
+      <button type="button" data-native="높을 최|하늘|">최하늘</button>
+      <button type="button" data-mixed="나라 정|은혜 은|샘">정은샘</button>
       <button type="button" data-ex="납 신|은혜 혜|참 진">신혜진</button>
       <button type="button" data-ex="쇠 김|슬기 지|꽃부리 영">김지영</button>
     </div>
@@ -238,7 +260,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v12</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v14</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -766,11 +788,105 @@ function resolve(text,dict){
   const n=dueum(eum);
   let cands=dict.filter(d=>dueum(eumOf(d.kr))===n);
   let picked=cands;
-  if(hun){const h=hun.replace(/\s/g,'');const f=cands.filter(d=>{const dh=hunOf(d.kr).replace(/\s/g,'');return dh===h||dh.includes(h)||h.includes(dh)});picked=f}
+  if(hun){const h=hun.replace(/\s/g,'');const hk=d=>hunOf(d.kr).replace(/\s/g,'');
+    // 훈이 정확히 같은 글자를 먼저 (예: '은혜 은' → 恩, '은 은'(銀)이 아니라)
+    const exact=cands.filter(d=>hk(d)===h);picked=exact.length?exact:cands.filter(d=>{const dh=hk(d);return dh.includes(h)||h.includes(dh)})}
   if(!picked.length) return {raw:text,entry:null,kanji:'',kr:'',alts:[],guessed:false};
   const e=picked[0];
   return {raw:text,entry:e,kanji:e.jp,kr:e.kr,alts:hun?[]:cands.slice(1,6),guessed:!hun&&cands.length>1};
 }
+
+/* ---------- 순우리말 이름 사전 (AI가 안 될 때 쓰는 기본값) ---------- */
+// 낱말|뜻|한자(덩어리는 ,로)|읽기(,로)|성별(n/m/f) ; 여러 후보는 ; 로
+const NATIVE_RAW=`하늘|하늘|空|そら|n;天,音|あま,ね|f;天|たかし|m
+바다|바다|海,斗|かい,と|m;渚|なぎさ|f;海|うみ|f
+아라|바다|海,斗|かい,と|m;渚|なぎさ|f;亜,良|あ,ら|n
+별|별|昴|すばる|m;星,奈|せい,な|f;星|ほし|n
+한별|큰 별|昴|すばる|m;大,星|たい,せい|m;星,奈|せい,な|f
+달|달|月,斗|つき,と|m;美,月|み,つき|f;月|つき|n
+해|해|陽,太|よう,た|m;陽,菜|ひ,な|f;陽|ひなた|n
+빛|빛|光|ひかる|m;光|ひかり|f;輝|ひかる|m
+샘|샘|泉|いずみ|f;泉,太|せん,た|m;湧,也|ゆう,や|m
+솔|소나무|緑|みどり|f;松,太,郎|まつ,た,ろう|m;松,乃|まつ,の|f
+봄|봄|春,香|はる,か|f;春,樹|はる,き|m;春|はる|n
+새봄|새봄|春,香|はる,か|f;春,樹|はる,き|m;新,春|にい,はる|n
+여름|여름|夏,美|なつ,み|f;夏,輝|なつ,き|m;夏|なつ|n
+가을|가을|秋,穂|あき,ほ|f;秋,人|あき,と|m;秋|あき|n
+겨울|겨울|冬,美|ふゆ,み|f;冬,真|とう,ま|m;冬|ふゆ|n
+이슬|이슬|雫|しずく|f;露|つゆ|n;清|きよし|m
+노을|노을|茜|あかね|f;夕,真|ゆう,ま|m;夕,陽|ゆう,ひ|n
+나래|날개|翼|つばさ|n;翔|かける|m;羽,菜|は,な|f
+보람|보람·열매|実|みのり|f;実|みのる|m;結,実|ゆ,み|f
+슬기|지혜|智|さとし|m;千,智|ち,さと|f;賢|まさる|m
+다솜|사랑|愛|あい|f;愛,美|まな,み|f;愛,斗|まな,と|m
+아름|아름다움|麗|うらら|f;美,麗|み,れい|f;麗,央|れ,お|m
+나비|나비|揚羽|あげは|f;蝶,子|ちょう,こ|f;羽,流|は,る|m
+초롱|등불|灯|あかり|f;灯,真|とう,ま|m;灯|ともる|m
+단비|반가운 비|恵|めぐみ|f;慈,雨|じ,う|m;恵,雨|けい,う|m
+미르|용|龍|りゅう|m;竜,也|たつ,や|m;龍,美|たつ,み|f
+누리|세상|世,那|せ,な|f;大,地|だい,ち|m;和|のどか|f
+가람|강|大,河|たい,が|m;河,奈|か,な|f;渓|けい|m
+하나|하나|花|はな|f;一|はじめ|m;華|はな|f
+힘찬|힘찬|勇|いさむ|m;力|ちから|m;勇,美|いさ,み|f
+마루|꼭대기|嶺|れい|n;峰,子|みね,こ|f;岳|がく|m
+구름|구름|雲雀|ひばり|f;雲,斗|くも,と|m;雲,海|うん,かい|m
+꽃|꽃|花|はな|f;花,音|か,のん|f;咲,也|さく,や|m
+비|비|時雨|しぐれ|n;雨,音|あま,ね|f;雨,竜|う,りゅう|m
+눈|눈|雪,菜|ゆき,な|f;雪,斗|ゆき,と|m;雪|ゆき|n
+바람|바람|颯|はやて|m;風,花|ふう,か|f;風,太|ふう,た|m
+가온|가운데|中|あたる|m;真,中|ま,なか|n;央|なかば|n
+라온|즐거운|楽|がく|m;楽,々|らく,らく|n;笑,美|え,み|f
+온유|따뜻하고 부드러운|温|ゆたか|m;穏|のどか|f;温,美|あつ,み|f
+은솔|은빛 소나무|銀,松|ぎん,まつ|m;銀,緑|ぎん,りょく|n;緑|みどり|f`;
+const NATIVE=NATIVE_RAW.trim().split('\n').map(l=>{const [w,ko,...rest]=l.split('|');const c=rest.join('|').split(';').map(x=>{const [k,r,g]=x.split('|');return {gk:k.split(','),parts:r.split(','),g}});return {w,ko,c}});
+function nativeMatches(name){
+  const exact=NATIVE.find(x=>x.w===name);if(exact)return [exact];
+  return NATIVE.filter(x=>name.includes(x.w)).sort((a,b)=>b.w.length-a.w.length||(name.endsWith(b.w)?1:0)-(name.endsWith(a.w)?1:0));
+}
+function nativeOffline(sur,name,gender,exclude){
+  exclude=exclude||new Set();
+  const ms=nativeMatches(name);if(!ms.length)return [];
+  const sOpts=sur.entry?[...sur.entry.readings].sort((a,b)=>(b.t==='훈')-(a.t==='훈')):[{k:'',t:''}];
+  const out=[],seen=new Set();
+  for(const pass of [0,1])for(const m of ms)for(const c of m.c){
+    if(out.length>=3)break;
+    if(gender&&c.g!=='n'&&c.g!==gender)continue;
+    const so=sOpts[pass%sOpts.length];if(!so.k)continue;
+    const key=so.k+'|'+c.gk.join('')+'|'+c.parts.join('');
+    if(seen.has(key)||(pass===0&&exclude.has(key)))continue;seen.add(key);
+    const vl=gender==='f'?VIBES_F:gender==='m'?VIBES_M:VIBES.mx;
+    out.push({sk:so.k,stype:so.t==='훈'?'훈독':'음독',gk:c.gk,parts:c.parts,gtype:'뜻 옮김',
+      meaning:`'${m.w}'(${m.ko})의 뜻을 담은 ${c.gk.join('')}(으)로 옮긴 이름이에요.`,vibe:pick(vl,so.k+c.gk.join(''))});
+  }
+  return out;
+}
+// 한자 글자 + 순우리말 글자가 섞인 이름 (예: 恩 + 샘)
+function mixedOffline(sur,fields,gender,exclude){
+  exclude=exclude||new Set();
+  const opts=fields.map(f=>{
+    if(f.kind==='han'){const e=f.entry;if(!e)return [];return [...e.kun.map(k=>({gk:[f.kanji],parts:[k],kun:1})),...e.on.map(k=>({gk:[f.kanji],parts:[k],kun:0}))]}
+    const ms=nativeMatches(f.syl);const seen=new Set();const out=[];
+    for(const m of ms)for(const c of m.c){if(gender&&c.g!=='n'&&c.g!==gender)continue;const k=c.gk[0]+'|'+c.parts[0];if(seen.has(k))continue;seen.add(k);out.push({gk:[c.gk[0]],parts:[c.parts[0]],kun:1,w:m})}
+    return out;
+  });
+  if(opts.some(o=>!o.length))return [];
+  let combos=opts[0].map(o=>[o]);for(let i=1;i<opts.length;i++){const nx=[];combos.forEach(c=>opts[i].forEach(o=>nx.push([...c,o])));combos=nx}
+  const sOpts=sur.entry?[...sur.entry.readings].sort((a,b)=>(b.t==='훈')-(a.t==='훈')):[];if(!sOpts.length)return [];
+  const scored=combos.map(c=>{const gk=c.flatMap(x=>x.gk),parts=c.flatMap(x=>x.parts),m=mora(parts.join(''));
+    let sc=(m>=3&&m<=4)?1:(m===2||m===5)?0:-1.2;sc+=c.reduce((a,x)=>a+(x.kun?.4:0),0);sc+=genderScore(parts.join(''),gender);return {c,gk,parts,sc}}).sort((a,b)=>b.sc-a.sc);
+  const out=[],seen=new Set();
+  for(const pass of [0,1])for(const x of scored){if(out.length>=3)break;const so=sOpts[pass%sOpts.length];const key=so.k+'|'+x.gk.join('')+'|'+x.parts.join('');
+    if(seen.has(key)||(pass===0&&exclude.has(key)))continue;seen.add(key);
+    const desc=x.c.map((p,i)=>{const f=fields[i];if(f.kind==='han')return `'${f.syl}'${josa(f.syl,'는','은')} 한자 ${f.kanji} 그대로`;const ko=p.w?p.w.ko:f.syl;return `'${f.syl}'${ko!==f.syl?`(${ko})`:''}${josa(f.syl,'는','은')} 뜻을 담은 ${p.gk[0]}(으)로`}).join(', ');
+    const vl=gender==='f'?VIBES_F:gender==='m'?VIBES_M:VIBES.mx;
+    out.push({sk:so.k,stype:so.t==='훈'?'훈독':'음독',gk:x.gk,parts:x.parts,gtype:'한자+뜻 옮김',meaning:desc+' 옮겼어요.',vibe:pick(vl,so.k+x.gk.join(''))})}
+  return out;
+}
+const natFlag=f=>{const c=$('#n-'+f.slice(2));return !!c&&c.checked};
+function applyNatFlags(){['f-g1','f-g2'].forEach(f=>{const on=natFlag(f);const inp=$('#'+f);inp.closest('.field').classList.toggle('is-nat',on);
+  if(on){inp.removeAttribute('list');inp.placeholder=f==='f-g1'?'예: 하늘':'예: 샘'}else{inp.setAttribute('list','dl-giv');inp.placeholder=f==='f-g1'?'길할 길':'한가지 동'}});updateHints()}
+const isNative=()=>{const r=document.querySelector('input[name="nmode"]:checked');return !!r&&r.value==='native'};
+function applyMode(){const n=isNative();document.querySelectorAll('.han-only').forEach(x=>x.hidden=n);document.querySelectorAll('.native-only').forEach(x=>x.hidden=!n);updateHints()}
 
 /* ---------- Kana → romaji / hangul ---------- */
 const K1={あ:['a','아'],い:['i','이'],う:['u','우'],え:['e','에'],お:['o','오'],か:['ka','카'],き:['ki','키'],く:['ku','쿠'],け:['ke','케'],こ:['ko','코'],が:['ga','가'],ぎ:['gi','기'],ぐ:['gu','구'],げ:['ge','게'],ご:['go','고'],さ:['sa','사'],し:['shi','시'],す:['su','스'],せ:['se','세'],そ:['so','소'],ざ:['za','자'],じ:['ji','지'],ず:['zu','즈'],ぜ:['ze','제'],ぞ:['zo','조'],た:['ta','타'],ち:['chi','치'],つ:['tsu','츠'],て:['te','테'],と:['to','토'],だ:['da','다'],ぢ:['ji','지'],づ:['zu','즈'],で:['de','데'],ど:['do','도'],な:['na','나'],に:['ni','니'],ぬ:['nu','누'],ね:['ne','네'],の:['no','노'],は:['ha','하'],ひ:['hi','히'],ふ:['fu','후'],へ:['he','헤'],ほ:['ho','호'],ば:['ba','바'],び:['bi','비'],ぶ:['bu','부'],べ:['be','베'],ぼ:['bo','보'],ぱ:['pa','파'],ぴ:['pi','피'],ぷ:['pu','푸'],ぺ:['pe','페'],ぽ:['po','포'],ま:['ma','마'],み:['mi','미'],む:['mu','무'],め:['me','메'],も:['mo','모'],や:['ya','야'],ゆ:['yu','유'],よ:['yo','요'],ら:['ra','라'],り:['ri','리'],る:['ru','루'],れ:['re','레'],ろ:['ro','로'],わ:['wa','와'],を:['o','오']};
@@ -877,13 +993,14 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 let current=null,pendingPick=null;
 {const pp=new URLSearchParams(location.search).get('p');if(pp!==null&&/^[0-2]$/.test(pp))pendingPick=+pp;}
 
+const givKanji=(res,n)=>n.gk||res.giv.map(g=>g.kanji);
 function nameView(res,n){
   const sr=conv(n.sk),gr=conv(n.parts.join(''));
-  return {roma:`${sr.r} ${gr.r}`,hangul:`${sr.h} ${gr.h}`,kana:`${n.sk} ${n.parts.join('')}`,kanji:`${res.sur.kanji} ${res.giv.map(g=>g.kanji).join('')}`};
+  return {roma:`${sr.r} ${gr.r}`,hangul:`${sr.h} ${gr.h}`,kana:`${n.sk} ${n.parts.join('')}`,kanji:`${res.sur.kanji} ${givKanji(res,n).join('')}`};
 }
 function rubyHTML(res,n){
   const s=`<span class="sur"><ruby>${esc(res.sur.kanji)}<rt>${esc(n.sk)}</rt></ruby></span>`;
-  const g=res.giv.map((x,i)=>`<ruby>${esc(x.kanji)}<rt>${esc(n.parts[i]||'')}</rt></ruby>`).join('');
+  const g=givKanji(res,n).map((k,i)=>`<ruby>${esc(k)}<rt>${esc(n.parts[i]||'')}</rt></ruby>`).join('');
   return s+`<span>${g}</span>`;
 }
 function render(res){
@@ -936,17 +1053,76 @@ const EXAMPLE={source:'example',kname:'홍길동',sur:{kanji:'洪',kr:'성 홍'}
 
 /* ---------- Submit ---------- */
 function updateHints(){
+  if($('#h-native')){const nm=$('#f-native').value.trim();const el=$('#h-native');
+    if(!nm)el.textContent='';
+    else if(!/^[가-힣]{1,5}$/.test(nm))el.textContent='한글로만 적어 주세요 (예: 예솔)';
+    else{const ms=nativeMatches(nm);el.innerHTML=ms.length?ms.slice(0,2).map(m=>`'${esc(m.w)}' = ${esc(m.ko)} → <b lang="ja">${esc(m.c[0].gk.join(''))}</b>`).join(' · '):(aiOK?'AI가 뜻을 풀어서 지어요':'지금은 사전에 있는 말만 지을 수 있어요')}}
   [['f-sur','h-sur',SUR],['f-g1','h-g1',GIV],['f-g2','h-g2',GIV]].forEach(([f,h,d])=>{
-    const r=resolve($('#'+f).value,d);const el=$('#'+h);
+    const el=$('#'+h);
+    if(f!=='f-sur'&&natFlag(f)){const v=$('#'+f).value.trim().replace(/\s/g,'');if(!v){el.textContent='';return}
+      if(!/^[가-힣]{1,3}$/.test(v)){el.textContent='한글로 적어 주세요 (예: 샘)';return}
+      const ms=nativeMatches(v);el.innerHTML=ms.length?`'${esc(ms[0].w)}' = ${esc(ms[0].ko)} → <b lang="ja">${esc(ms[0].c[0].gk[0])}</b>`:(aiOK?'순우리말 · AI가 뜻을 풀어서 지어요':'지금은 사전에 있는 말만 지을 수 있어요');return}
+    const r=resolve($('#'+f).value,d);
     if(!r){el.textContent='';return}
     if(r.entry)el.innerHTML=`<b lang="ja">${esc(r.kanji)}</b> ${esc(r.kr)}${r.guessed?' · 음만 적어서 가장 흔한 글자로 골랐어요':''}`;
     else if(r.kanji)el.innerHTML=`<b lang="ja">${esc(r.kanji)}</b> 사전에 없는 글자 · AI가 읽어요`;
     else{const eum=eumOf(r.raw||'');const n=eum.length===1?dueum(eum):'';const c=n?d.filter(x=>dueum(eumOf(x.kr))===n).slice(0,6):[];
-      el.innerHTML=(aiOK?'사전에 없어요 · AI가 찾아볼게요':'사전에 없어요 · 한자를 직접 넣어 주세요')+(c.length?'<br>혹시 이 글자? '+c.map(x=>`<button type="button" class="hfix" data-target="${f}" data-val="${esc(x.kr)}" title="${esc(x.kr)}" lang="ja">${esc(x.jp)}</button>`).join(''):'');}
+      el.innerHTML=(aiOK?'사전에 없어요 · AI가 찾아볼게요':'사전에 없어요 · 한자를 직접 넣어 주세요')+(f!=='f-sur'&&/^[가-힣]+$/.test((r.raw||'').replace(/\s/g,''))?'<br>이 글자가 순우리말이면 칸 위의 <b>순우리말</b>에 체크해 주세요':'')+(c.length?'<br>혹시 이 글자? '+c.map(x=>`<button type="button" class="hfix" data-target="${f}" data-val="${esc(x.kr)}" title="${esc(x.kr)}" lang="ja">${esc(x.jp)}</button>`).join(''):'');}
   });
 }
+async function submitNative(opts,ov){
+  const sur=resolve($('#f-sur').value,SUR);
+  const name=ov?ov.name:$('#f-native').value.trim().replace(/\s/g,'');const meaning=ov?'':$('#f-mean').value.trim().slice(0,30);
+  const fixed=ov?ov.fields.filter(f=>f.kind==='han').map(f=>({syl:f.syl,kanji:f.kanji,kr:f.kr||''})):[];
+  if(!sur||!name){showError('성과 이름을 적어 주세요.');return}
+  if(!ov&&!/^[가-힣]{1,5}$/.test(name)){showError('순우리말 이름은 한글로만 적어 주세요. (예: 예솔)');return}
+  const gender=genderVal();
+  try{localStorage.setItem('jpname-last',JSON.stringify(ov?[$('#f-sur').value,$('#f-g1').value,$('#f-g2').value,gender,'han','','',[natFlag('f-g1'),natFlag('f-g2')]]:[$('#f-sur').value,'','',gender,'native',name,meaning]))}catch(_){}
+  const kn=(sur.kr?dueum(eumOf(sur.kr)):(sur.raw.match(HAN)?sur.raw:eumOf(sur.raw)))+name;
+  const base={mode:'native',native:{name,meaning,fixed},kname:kn,giv:[]};if(ov)base.mixed=ov.fields.map(f=>({kind:f.kind,syl:f.syl,kanji:f.kanji||'',kr:f.kr||''}));
+  const offline=()=>ov?mixedOffline(sur,ov.fields,gender,exclude):nativeOffline(sur,name,gender,exclude);
+  const notes=[];const exclude=new Set(opts.exclude||[]);
+  if(aiOK){
+    showThinking();$('#go').disabled=true;currentCtl=new AbortController();
+    try{
+      const payload={mode:'native',sur:{kanji:sur.kanji,kr:sur.kr,raw:sur.raw},native:{name,meaning,fixed},fresh:!!opts.fresh,exclude:[...exclude],gender};
+      let timedOut=false;const tmo=setTimeout(()=>{timedOut=true;currentCtl&&currentCtl.abort()},45000);
+      const resp=await fetch('/api/name',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:currentCtl.signal}).finally(()=>clearTimeout(tmo));
+      const d=await resp.json().catch(()=>null);
+      if(!resp.ok||!d||d.error)throw {code:(d&&d.error)||'upstream'};
+      const KR=/^[ぁ-ゖー]+$/;const HC=/^[\p{Script=Han}々]{1,3}$/u;
+      const names=(d.names||[]).map(x=>x&&KR.test(x.surname_kana||'')&&Array.isArray(x.given_kanji)&&Array.isArray(x.given_parts)&&x.given_kanji.length===x.given_parts.length&&x.given_kanji.every(k=>HC.test(k))&&x.given_parts.every(p=>KR.test(p))&&fixed.every(f=>x.given_kanji.join('').includes(f.kanji))?
+        {sk:x.surname_kana,stype:String(x.surname_type||''),gk:x.given_kanji,parts:x.given_parts,gtype:String(x.given_type||''),meaning:String(x.meaning||''),vibe:String(x.vibe||'')}:null).filter(Boolean).slice(0,3);
+      if(!names.length)throw {code:'invalid'};
+      if(names.length<3&&sur.entry){const seen=new Set(names.map(n=>n.sk+'|'+n.gk.join('')+'|'+n.parts.join('')));for(const n of offline()){if(names.length>=3)break;const k=n.sk+'|'+n.gk.join('')+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
+      if(d.note)notes.push(esc(d.note));
+      const rs=d.surname&&d.surname.kanji&&HAN.test(d.surname.kanji)?{kanji:[...d.surname.kanji][0],kr:d.surname.kr||sur.kr}:{kanji:sur.kanji,kr:sur.kr};
+      lastAIError='';setStatus('on');render({...base,source:'ai',sur:rs,names,notes});updateShareState();return;
+    }catch(err){
+      const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
+      if(code==='cancelled'&&!timedOutNative()){showError('멈췄어요. 다시 짓기를 눌러 주세요.');return}
+      lastAIError=code;if(code==='budget'||code==='not_configured'){aiOK=false}setStatus('off');
+      notes.push('AI 작명이 잠시 안 돼서 사전으로 지었어요.');
+    }finally{$('#go').disabled=false;currentCtl=null}
+  }
+  if(!sur.entry){showError('성 한자를 사전에서 찾지 못했어요. 훈음(예: 높을 최)으로 적어 주세요.');return}
+  const names=offline();
+  if(!names.length){showError(`'${ov?ov.fields.filter(f=>f.kind==='nat').map(f=>f.syl).join(', '):name}'은 AI가 뜻을 풀어야 지을 수 있는 이름이에요. 잠시 뒤 다시 눌러 주세요.${lastAIError?` (오류 코드: ${lastAIError})`:''}`);return}
+  render({...base,source:'dict',sur:{kanji:sur.kanji,kr:sur.kr},names,notes});updateShareState();
+}
+function timedOutNative(){return false}
 async function submit(e,opts){
   e&&e.preventDefault&&e.preventDefault();opts=opts||{};
+  if(isNative())return submitNative(opts);
+  if(natFlag('f-g1')||natFlag('f-g2')){
+    const fields=[];
+    for(const f of ['f-g1','f-g2']){const v=$('#'+f).value.trim();if(!v)continue;
+      if(natFlag(f)){const t=v.replace(/\s/g,'');if(!/^[가-힣]{1,3}$/.test(t)){showError('순우리말 칸은 한글로 적어 주세요. (예: 샘)');return}fields.push({kind:'nat',syl:t})}
+      else{const r=resolve(v,GIV);if(!r||!r.kanji){showError(`「${v}」 한자를 찾지 못했어요. 훈음(예: 은혜 은)으로 적거나, 순우리말이면 순우리말에 체크해 주세요.`);return}
+        const kr=r.kr||(r.entry&&r.entry.kr)||'';fields.push({kind:'han',syl:kr?eumOf(kr):r.kanji,kanji:r.kanji,kr,entry:r.entry})}}
+    if(!fields.length){showError('이름을 적어 주세요.');return}
+    return submitNative(opts,{name:fields.map(f=>f.syl).join(''),fields});
+  }
   const sur=resolve($('#f-sur').value,SUR);const g1=resolve($('#f-g1').value,GIV);const g2=resolve($('#f-g2').value,GIV);
   const giv=[g1,g2].filter(Boolean);
   if(!sur||!giv.length){showError('성과 이름 첫 글자는 꼭 적어 주세요.');return}
@@ -997,7 +1173,7 @@ async function makeCard(n){
   const res=current;const v=nameView(res,n);
   const W=1080,H=1350;const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');
   const disp='"Shippori Mincho B1", "Hiragino Mincho ProN", "Yu Mincho", serif', body='"IBM Plex Sans KR", "Apple SD Gothic Neo", sans-serif';
-  const allText=res.sur.kanji+res.giv.map(g=>g.kanji).join('')+n.sk+n.parts.join('')+v.roma+'推し名あなたの日本名';
+  const allText=res.sur.kanji+givKanji(res,n).join('')+n.sk+n.parts.join('')+v.roma+'推し名あなたの日本名';
   try{await Promise.all([document.fonts.load(`800 160px "Shippori Mincho B1"`,allText),document.fonts.load(`700 40px "Shippori Mincho B1"`,allText),document.fonts.load(`600 60px "IBM Plex Sans KR"`,v.hangul+res.kname+'나의일본이름캐릭터설정한자로지은재미로'),document.fonts.load(`400 34px "IBM Plex Sans KR"`,n.vibe+n.meaning+n.gtype+n.stype)])}catch(_){}
   x.fillStyle='#EFF0EB';x.fillRect(0,0,W,H);
   x.fillStyle='#1D2333';x.font=`600 30px ${body}`;x.fillText('나의 일본 이름',90,120);
@@ -1008,8 +1184,8 @@ async function makeCard(n){
   x.save();x.shadowColor='rgba(30,20,10,.25)';x.shadowBlur=30;x.shadowOffsetY=12;x.fillStyle=gr;x.fillRect(px,py,pw,ph);x.restore();
   for(let i=0;i<46;i++){const gx=px+8+i*7.6+Math.sin(i*1.7)*2;x.strokeStyle=`rgba(90,55,20,${0.04+0.05*Math.abs(Math.sin(i*2.3))})`;x.lineWidth=1+Math.abs(Math.sin(i))*1.5;x.beginPath();x.moveTo(gx,py);for(let yy=py;yy<=py+ph;yy+=30)x.lineTo(gx+Math.sin(yy/90+i)*3,yy);x.stroke()}
   x.strokeStyle='#B8945F';x.lineWidth=3;x.strokeRect(px+1.5,py+1.5,pw-3,ph-3);
-  const chars=[res.sur.kanji,...res.giv.map(g=>g.kanji)];const rubies=[n.sk,...n.parts];
-  const count=chars.length;const size=count>=3?170:200;const gap=60;const step=size*1.08;
+  const chars=[res.sur.kanji],rubies=[n.sk];givKanji(res,n).forEach((k,i)=>{[...k].forEach((c,j)=>{chars.push(c);rubies.push(j===0?(n.parts[i]||''):'')})});
+  const count=chars.length;const size=count>=4?135:count>=3?170:200;const gap=60;const step=size*1.08;
   const totalH=count*step+gap;let cy=py+(ph-totalH)/2;const cx=px+pw/2-22;
   x.textAlign='center';x.textBaseline='middle';
   chars.forEach((c,i)=>{const yy=cy+step/2;x.fillStyle='#2B1F12';x.font=`800 ${size}px ${disp}`;x.fillText(c,cx,yy);
@@ -1076,6 +1252,7 @@ const IN_APP=/KAKAOTALK|Instagram|FBAN|FBAV|Line\/|NAVER\(inapp|everytimeApp/i.t
 let kakaoReady=false;
 function shareURL(short,idx){
   if(current&&current.source!=='example'){const u=new URL(location.origin+'/');u.searchParams.set('s',current.sur.kanji);u.searchParams.set('g',current.giv.map(g=>g.kanji).join(''));
+    if(current.mode==='native')u.searchParams.set('g',current.native.name);
     if(short){const pk=(current.packedEach||[])[idx??(current.sel||0)];if(pk)u.searchParams.set('r',pk)}
     else{if(current.sel)u.searchParams.set('p',String(current.sel));if(current.packed)u.searchParams.set('r',current.packed)}
     return u.toString()}
@@ -1191,14 +1368,19 @@ $('#form').addEventListener('click',e=>{const b=e.target.closest('.hfix');if(b){
 $('#results').addEventListener('click',e=>{
   const s=e.target.closest('[data-share]');if(s){openShare(+s.dataset.share);return}
   const k=e.target.closest('[data-kakao]');if(k){kakaoShare(+k.dataset.kakao);return}
-  const rg=e.target.closest('[data-regen]');if(rg&&current){if(current.source==='example'){submit(null,{fresh:true});return}fillForm(current);submit(null,{fresh:true,exclude:current.names.map(n=>n.sk+'|'+n.parts.join(''))});return}
+  const rg=e.target.closest('[data-regen]');if(rg&&current){if(current.source==='example'){submit(null,{fresh:true});return}fillForm(current);submit(null,{fresh:true,exclude:current.names.map(n=>n.sk+'|'+(n.gk?n.gk.join('')+'|':'')+n.parts.join(''))});return}
   const pk=e.target.closest('[data-pick]');if(pk&&current){current.sel=+pk.dataset.pick;render(current);if(current.source!=='example')updateShareState();$('#res-main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
   const f=e.target.closest('[data-fix]');if(f){const ids=['f-sur','f-g1','f-g2'];const idx=+f.dataset.fix;$('#'+ids[idx]).value=f.dataset.val;updateHints();submit()}
 });
-document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
+document.querySelectorAll('[data-mixed]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.mixed.split('|');$('#m-han').checked=true;applyMode();$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;$('#n-g1').checked=false;$('#n-g2').checked=true;applyNatFlags();submit()});
+document.querySelectorAll('[data-native]').forEach(b=>b.onclick=()=>{const [a,c,d]=b.dataset.native.split('|');$('#m-native').checked=true;applyMode();$('#f-sur').value=a;$('#f-native').value=c;$('#f-mean').value=d||'';updateHints();submit()});
+document.querySelectorAll('input[name="nmode"]').forEach(r=>r.addEventListener('change',applyMode));
+['n-g1','n-g2'].forEach(id=>$('#'+id).addEventListener('change',applyNatFlags));
+['f-native','f-mean'].forEach(id=>$('#'+id).addEventListener('input',updateHints));
+document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('#m-han').checked=true;$('#n-g1').checked=false;$('#n-g2').checked=false;applyNatFlags();applyMode();const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
 $('#dl-sur').innerHTML=SUR.map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
 $('#dl-giv').innerHTML=GIV.filter(d=>d.c===d.jp||!GIV.some(o=>o!==d&&o.c===d.jp)).map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
-try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||'';const gr=document.querySelector(`input[name="gender"][value="${last[3]||''}"]`);if(gr)gr.checked=true}}catch(_){}
+try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||'';const gr=document.querySelector(`input[name="gender"][value="${last[3]||''}"]`);if(gr)gr.checked=true;if(last[4]==='native'){$('#m-native').checked=true;$('#f-native').value=last[5]||'';$('#f-mean').value=last[6]||''}if(Array.isArray(last[7])){$('#n-g1').checked=!!last[7][0];$('#n-g2').checked=!!last[7][1];applyNatFlags()}applyMode()}}catch(_){}
 initAds();
 render(EXAMPLE);updateHints();
 
@@ -1208,7 +1390,8 @@ const b64u={enc:b=>{let s='';b.forEach(c=>s+=String.fromCharCode(c));return btoa
 async function zip(bytes,mode){const cs=mode==='c'?new CompressionStream('deflate-raw'):new DecompressionStream('deflate-raw');const st=new Blob([bytes]).stream().pipeThrough(cs);return new Uint8Array(await new Response(st).arrayBuffer())}
 async function packResult(res,only){
   const list=typeof only==='number'?[res.names[only]]:res.names;
-  const o={k:res.kname,a:res.source==='ai'?1:0,s:[res.sur.kanji,res.sur.kr],g:res.giv.map(x=>[x.kanji,x.kr]),n:list.map(n=>[n.sk,n.stype,n.parts,n.gtype,n.meaning,n.vibe])};
+  const o={k:res.kname,a:res.source==='ai'?1:0,s:[res.sur.kanji,res.sur.kr],g:res.giv.map(x=>[x.kanji,x.kr]),n:list.map(n=>[n.sk,n.stype,n.parts,n.gtype,n.meaning,n.vibe,n.gk||0])};
+  if(res.mode==='native'){o.m=1;o.v=res.native.name;if(res.mixed)o.x=res.mixed.map(f=>[f.kind==='nat'?1:0,f.kind==='nat'?f.syl:f.kanji,f.kr||''])}
   const raw=new TextEncoder().encode(JSON.stringify(o));
   try{if(window.CompressionStream)return 'z'+b64u.enc(await zip(raw,'c'))}catch(_){}
   return 'j'+b64u.enc(raw);
@@ -1220,22 +1403,33 @@ async function unpackResult(t){
     const o=JSON.parse(new TextDecoder().decode(bytes));
     const str=(v,m)=>typeof v==='string'?v.slice(0,m):'';const KR=/^[ぁ-ゖー]{1,12}$/;
     const one=v=>Array.isArray(v)&&typeof v[0]==='string'&&HAN.test(v[0])?{kanji:[...v[0]][0],kr:str(v[1],12)}:null;
-    const sur=one(o.s);const giv=(Array.isArray(o.g)?o.g:[]).slice(0,2).map(one);
-    if(!sur||!giv.length||giv.some(x=>!x))return null;
-    const names=(Array.isArray(o.n)?o.n:[]).slice(0,3).map(x=>Array.isArray(x)&&KR.test(x[0]||'')&&Array.isArray(x[2])&&x[2].length===giv.length&&x[2].every(p=>KR.test(p||''))?
-      {sk:x[0],stype:str(x[1],12),parts:x[2],gtype:str(x[3],20),meaning:str(x[4],80),vibe:str(x[5],40)}:null).filter(Boolean);
+    const sur=one(o.s);const nat=o.m===1;const HC=/^[\p{Script=Han}々]{1,3}$/u;
+    const giv=nat?[]:(Array.isArray(o.g)?o.g:[]).slice(0,2).map(one);
+    if(!sur||(!nat&&(!giv.length||giv.some(x=>!x))))return null;
+    const names=(Array.isArray(o.n)?o.n:[]).slice(0,3).map(x=>{
+      if(!Array.isArray(x)||!KR.test(x[0]||'')||!Array.isArray(x[2])||!x[2].length||!x[2].every(p=>KR.test(p||'')))return null;
+      const gk=nat?x[6]:null;
+      if(nat?!(Array.isArray(gk)&&gk.length===x[2].length&&gk.every(k=>typeof k==='string'&&HC.test(k))):x[2].length!==giv.length)return null;
+      const n={sk:x[0],stype:str(x[1],12),parts:x[2],gtype:str(x[3],20),meaning:str(x[4],80),vibe:str(x[5],40)};if(gk)n.gk=gk;return n}).filter(Boolean);
     if(!names.length)return null;
-    const kname=/^[가-힣]{1,6}$/.test(o.k||'')?o.k:'';
-    return {source:o.a?'ai':'dict',kname:kname||'내 이름',sur,giv,names,notes:[]};
+    const kname=/^[가-힣\p{Script=Han}]{1,8}$/u.test(o.k||'')?o.k:'';
+    const res={source:o.a?'ai':'dict',kname:kname||'내 이름',sur,giv,names,notes:[]};
+    if(nat){const v=typeof o.v==='string'&&/^[가-힣\p{Script=Han}]{1,5}$/u.test(o.v)?o.v:'';res.mode='native';res.native={name:v,meaning:''};
+      if(Array.isArray(o.x)&&o.x.length<=2&&o.x.every(f=>Array.isArray(f)&&(f[0]===1?/^[가-힣]{1,3}$/.test(f[1]||''):HAN.test(f[1]||'')))){res.mixed=o.x.map(f=>f[0]===1?{kind:'nat',syl:f[1]}:{kind:'han',kanji:[...f[1]][0],kr:str(f[2],12),syl:f[2]?eumOf(str(f[2],12)):[...f[1]][0]})}}
+    return res;
   }catch(_){return null}
 }
 async function updateShareState(){
   const res=current;if(!res||res.source==='example')return;
   try{res.packed=await packResult(res);res.packedEach=await Promise.all(res.names.map((_,k)=>packResult(res,k)))}catch(_){res.packed='';res.packedEach=[]}
   if(res!==current)return;
-  try{const u=new URL(location.href);u.search='';u.searchParams.set('s',res.sur.kanji);u.searchParams.set('g',res.giv.map(g=>g.kanji).join(''));if(res.sel)u.searchParams.set('p',String(res.sel));if(res.packed)u.searchParams.set('r',res.packed);history.replaceState(null,'',u)}catch(_){}
+  try{const u=new URL(location.href);u.search='';u.searchParams.set('s',res.sur.kanji);u.searchParams.set('g',res.mode==='native'?res.native.name:res.giv.map(g=>g.kanji).join(''));if(res.sel)u.searchParams.set('p',String(res.sel));if(res.packed)u.searchParams.set('r',res.packed);history.replaceState(null,'',u)}catch(_){}
 }
-function fillForm(res){$('#f-sur').value=res.sur.kanji;$('#f-g1').value=res.giv[0]?res.giv[0].kanji:'';$('#f-g2').value=res.giv[1]?res.giv[1].kanji:'';updateHints()}
+function fillForm(res){$('#f-sur').value=res.sur.kanji;
+  if(res.mixed){$('#m-han').checked=true;['f-g1','f-g2'].forEach((f,i)=>{const x=res.mixed[i];$('#n-g'+(i+1)).checked=!!x&&x.kind==='nat';$('#'+f).value=x?(x.kind==='nat'?x.syl:x.kanji):''});applyNatFlags()}
+  else if(res.mode==='native'){$('#m-native').checked=true;$('#f-native').value=res.native.name;$('#f-mean').value=res.native.meaning||''}
+  else{$('#m-han').checked=true;$('#n-g1').checked=false;$('#n-g2').checked=false;applyNatFlags();$('#f-g1').value=res.giv[0]?res.giv[0].kanji:'';$('#f-g2').value=res.giv[1]?res.giv[1].kanji:''}
+  applyMode()}
 setStatus('on');
 (async()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g'),r=p.get('r');
   if(r){const res=await unpackResult(r);if(res){fillForm(res);render(res);updateShareState();return}}
