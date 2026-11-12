@@ -7,7 +7,7 @@
 <meta name="description" content="내 이름 한자를 일본식으로 읽으면? 성은 그대로, 이름은 음독·훈독으로 지은 일본 이름 3가지를 추천해 드려요.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="내 이름, 일본에선 뭐라고 읽을까?">
-<meta property="og:description" content="내 이름 한자로 짓는 일본 이름. 홍길동 → 코 요시토모">
+<meta property="og:description" content="내 이름 한자로 짓는 일본 이름. 홍길동 → 오미즈 요시토모">
 <meta property="og:image" content="/og.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%23D2B282'/%3E%3Ctext x='32' y='46' font-size='40' text-anchor='middle' fill='%232B1F12' font-family='serif'%3E名%3C/text%3E%3C/svg%3E">
@@ -200,7 +200,7 @@ footer .ver{opacity:.6}
     <div class="fields">
       <div class="field">
         <label for="f-sur">성</label>
-        <input id="f-sur" list="dl-sur" placeholder="성 홍">
+        <input id="f-sur" list="dl-sur" placeholder="넓을 홍">
         <div class="hint" id="h-sur"></div>
       </div>
       <div class="field han-only">
@@ -260,7 +260,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v14</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v15</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -289,72 +289,72 @@ footer .ver{opacity:.6}
 /* ---------- Dictionary: 한자|훈음|readings ---------- */
 // Surnames: char|훈음|reading:type,...|japanese form
 const SUR_RAW = `金|쇠 김|かね:훈,きん:음
-李|오얏 리|り:음
-朴|성 박|ぼく:음
+李|오얏 리|すもも:훈,り:음
+朴|성 박|ほお:훈,ぼく:음
 崔|높을 최|さい:음
 鄭|나라 정|てい:음
-姜|성 강|きょう:음
+姜|성 강|はじかみ:훈,きょう:음
 趙|나라 조|ちょう:음
-尹|성 윤|ただ:훈,いん:음
+尹|성 윤|おさ:훈,ただ:훈,いん:음
 張|베풀 장|はり:훈,ちょう:음
 林|수풀 림|はやし:훈,りん:음
-韓|나라 한|かん:음
+韓|나라 한|から:훈,かん:음
 吳|성 오|くれ:훈,ご:음|呉
-徐|천천할 서|じょ:음
-申|납 신|しん:음
-權|권세 권|ごん:음,けん:음|権
+徐|천천할 서|おもむろ:훈,じょ:음
+申|납 신|さる:훈,しん:음
+權|권세 권|かり:훈,ごん:음,けん:음|権
 黃|누를 황|き:훈,こう:음|黄
 安|편안 안|やす:훈,あん:음
 宋|송나라 송|そう:음
 柳|버들 류|やなぎ:훈,りゅう:음
-洪|넓을 홍|こう:음
-全|온전 전|ぜん:음
+洪|넓을 홍|おおみず:훈,こう:음
+全|온전 전|すべて:훈,ぜん:음
 高|높을 고|たか:훈,こう:음
 文|글월 문|ふみ:훈,ぶん:음
 孫|손자 손|まご:훈,そん:음
-梁|들보 량|はり:훈,りょう:음
+梁|들보 량|やな:훈,はり:훈,りょう:음
 裵|성 배|はい:음
 白|흰 백|しろ:훈,はく:음
 曺|성 조|そう:음
 許|허락할 허|もと:훈,きょ:음
 劉|죽일 류|りゅう:음
 南|남녘 남|みなみ:훈,なん:음
-沈|잠길 심|しん:음
+沈|잠길 심|しず:훈,しん:음
 盧|성 노|ろ:음
 河|물 하|かわ:훈,か:음
-丁|고무래 정|てい:음
+丁|고무래 정|ひのと:훈,てい:음
 成|이룰 성|なり:훈,せい:음
 車|수레 차|くるま:훈,しゃ:음
-具|갖출 구|ぐ:음
-郭|둘레 곽|かく:음
+具|갖출 구|とも:훈,ぐ:음
+郭|둘레 곽|くるわ:훈,かく:음
 禹|성 우|う:음
 朱|붉을 주|あけ:훈,しゅ:음
-任|맡길 임|にん:음
+任|맡길 임|まかせ:훈,にん:음
 田|밭 전|た:훈,でん:음
 閔|성 민|びん:음
-羅|벌릴 라|ら:음
-陳|베풀 진|ちん:음
+羅|벌릴 라|つら:훈,ら:음
+陳|베풀 진|のぶ:훈,ちん:음
 池|못 지|いけ:훈,ち:음
-嚴|엄할 엄|げん:음|厳
+嚴|엄할 엄|いつ:훈,げん:음|厳
 蔡|성 채|さい:음
 元|으뜸 원|もと:훈,げん:음
 千|일천 천|ち:훈,せん:음
 方|모 방|かた:훈,ほう:음
-孔|구멍 공|こう:음
-玄|검을 현|げん:음
-咸|다 함|かん:음
+孔|구멍 공|あな:훈,こう:음
+玄|검을 현|くろ:훈,げん:음
+咸|다 함|みな:훈,かん:음
 卞|성 변|べん:음
 楊|버들 양|やなぎ:훈,よう:음
-廉|청렴할 렴|れん:음
-邊|가 변|へん:음|辺
+廉|청렴할 렴|やす:훈,れん:음
+邊|가 변|あたり:훈,へん:음|辺
 呂|성 려|ろ:음
 秋|가을 추|あき:훈,しゅう:음
 都|도읍 도|みやこ:훈,と:음
 石|돌 석|いし:훈,せき:음
 魚|물고기 어|うお:훈,ぎょ:음
 馬|말 마|うま:훈,ば:음
-王|임금 왕|おう:음
-奇|기이할 기|き:음
+王|임금 왕|きみ:훈,おう:음
+奇|기이할 기|くし:훈,き:음
 明|밝을 명|あけ:훈,めい:음
 陸|뭍 육|くが:훈,りく:음
 睦|화목할 목|むつ:훈,ぼく:음
@@ -790,7 +790,9 @@ function resolve(text,dict){
   let picked=cands;
   if(hun){const h=hun.replace(/\s/g,'');const hk=d=>hunOf(d.kr).replace(/\s/g,'');
     // 훈이 정확히 같은 글자를 먼저 (예: '은혜 은' → 恩, '은 은'(銀)이 아니라)
-    const exact=cands.filter(d=>hk(d)===h);picked=exact.length?exact:cands.filter(d=>{const dh=hk(d);return dh.includes(h)||h.includes(dh)})}
+    const exact=cands.filter(d=>hk(d)===h);picked=exact.length?exact:cands.filter(d=>{const dh=hk(d);return dh.includes(h)||h.includes(dh)});
+    // 훈이 사전과 달라도(예: '성 홍') 같은 음의 글자가 있으면 가장 흔한 글자로 고르고 다른 후보를 보여줌
+    if(!picked.length&&cands.length){const e=cands[0];return {raw:text,entry:e,kanji:e.jp,kr:e.kr,alts:cands.slice(1,6),guessed:true}}}
   if(!picked.length) return {raw:text,entry:null,kanji:'',kr:'',alts:[],guessed:false};
   const e=picked[0];
   return {raw:text,entry:e,kanji:e.jp,kr:e.kr,alts:hun?[]:cands.slice(1,6),guessed:!hun&&cands.length>1};
@@ -954,7 +956,7 @@ function offlineNames(sur,giv,exclude,gender){
       if(mora(a.k)>=3||mora(b.k)>=3)s-=1.6;
       if(a.k===b.k)s-=2;}
     s+=(m>=3&&m<=4)?.6:m===2?.2:m===5?-.8:m>=6?-2:-.6;
-    if(so.t==='kun')s+=.5; if(mora(so.k)===1)s-=.2;
+    if(so.t==='kun')s+=1.2; if(mora(so.k)===1)s-=.2;
     s+=genderScore(gk,gender);
     out.push({sk:so.k,st:so.t,parts:c.map(x=>x.k),types:c.map(x=>x.t),score:s});
   }
@@ -963,6 +965,8 @@ function offlineNames(sur,giv,exclude,gender){
   for(const o of out){const key=o.sk+'|'+o.parts.join('');const g=o.parts.join('');
     if(seen.has(key)||exclude.has(key)||(gcount[g]||0)>=2)continue;seen.add(key);gcount[g]=(gcount[g]||0)+1;chosen.push(o);if(chosen.length===3)break}
   for(const o of out){if(chosen.length>=3)break;const key=o.sk+'|'+o.parts.join('');if(!seen.has(key)){seen.add(key);chosen.push(o)}}
+  // 성은 훈독이 있으면 1순위는 무조건 훈독
+  if(chosen.length&&chosen[0].st!=='kun'){const k=out.find(o=>o.st==='kun');if(k){const i=chosen.indexOf(k);if(i>0)chosen.splice(i,1);else chosen.pop();chosen.unshift(k)}}
   return chosen.map(o=>{
     const gt=o.types.map(typeLabel).join('+');
     const kind=o.types.length===1?'one':o.types.every(t=>t==='on')?'oo':o.types.every(t=>t==='kun')?'kk':'mx';
@@ -993,6 +997,11 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 let current=null,pendingPick=null;
 {const pp=new URLSearchParams(location.search).get('p');if(pp!==null&&/^[0-2]$/.test(pp))pendingPick=+pp;}
 
+function kunFirst(surKanji,names){
+  const e=SUR.find(x=>x.jp===surKanji||x.c===surKanji);if(!e||!names.length)return names;
+  const kun=new Set(e.readings.filter(r=>r.t==='훈').map(r=>r.k));if(!kun.size||kun.has(names[0].sk))return names;
+  const i=names.findIndex(n=>kun.has(n.sk));if(i>0){const [x]=names.splice(i,1);names.unshift(x)}return names;
+}
 const givKanji=(res,n)=>n.gk||res.giv.map(g=>g.kanji);
 function nameView(res,n){
   const sr=conv(n.sk),gr=conv(n.parts.join(''));
@@ -1046,10 +1055,10 @@ function showThinking(){
 function showError(msg){adsVisible(false);$('#trip').hidden=true;$('#res-rest').innerHTML='';$('#res-main').innerHTML=`<p class="err">${esc(msg)}</p>`}
 
 /* ---------- Example (preloaded) ---------- */
-const EXAMPLE={source:'example',kname:'홍길동',sur:{kanji:'洪',kr:'성 홍'},giv:[{kanji:'吉',kr:'길할 길'},{kanji:'同',kr:'한가지 동'}],notes:[],names:[
-  {sk:'こう',stype:'음독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'길한(吉) 일을 함께(同) 나누는 사람. 요시토모는 일본 무사 이름에도 있는 울림이에요.',vibe:'전국시대 떠돌이 무사'},
-  {sk:'こう',stype:'음독',parts:['きち','どう'],gtype:'음독+음독',meaning:'두 글자를 소리 그대로 읽어 옛 이야기 속 인물 같은 이름이 됐어요.',vibe:'에도 시대 의적 두목'},
-  {sk:'おおみず',stype:'훈독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'洪을 큰물이라는 뜻의 훈독 오미즈로 읽은 버전. 성부터 스케일이 커요.',vibe:'홍수도 막아내는 마을 영웅'}]};
+const EXAMPLE={source:'example',kname:'홍길동',sur:{kanji:'洪',kr:'넓을 홍'},giv:[{kanji:'吉',kr:'길할 길'},{kanji:'同',kr:'한가지 동'}],notes:[],names:[
+  {sk:'おおみず',stype:'훈독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'洪을 큰물이라는 뜻의 훈독 오미즈로, 길한(吉) 일을 함께(同) 나누는 요시토모. 성부터 스케일이 커요.',vibe:'홍수도 막아내는 마을 영웅'},
+  {sk:'こう',stype:'음독',parts:['よし','とも'],gtype:'이름읽기+이름읽기',meaning:'성은 짧게 코, 이름 요시토모는 일본 무사 이름에도 있는 울림이에요.',vibe:'전국시대 떠돌이 무사'},
+  {sk:'こう',stype:'음독',parts:['きち','どう'],gtype:'음독+음독',meaning:'두 글자를 소리 그대로 읽어 옛 이야기 속 인물 같은 이름이 됐어요.',vibe:'에도 시대 의적 두목'}]};
 
 /* ---------- Submit ---------- */
 function updateHints(){
@@ -1097,7 +1106,7 @@ async function submitNative(opts,ov){
       if(names.length<3&&sur.entry){const seen=new Set(names.map(n=>n.sk+'|'+n.gk.join('')+'|'+n.parts.join('')));for(const n of offline()){if(names.length>=3)break;const k=n.sk+'|'+n.gk.join('')+'|'+n.parts.join('');if(!seen.has(k)){seen.add(k);names.push(n)}}}
       if(d.note)notes.push(esc(d.note));
       const rs=d.surname&&d.surname.kanji&&HAN.test(d.surname.kanji)?{kanji:[...d.surname.kanji][0],kr:d.surname.kr||sur.kr}:{kanji:sur.kanji,kr:sur.kr};
-      lastAIError='';setStatus('on');render({...base,source:'ai',sur:rs,names,notes});updateShareState();return;
+      kunFirst(rs.kanji,names);lastAIError='';setStatus('on');render({...base,source:'ai',sur:rs,names,notes});updateShareState();return;
     }catch(err){
       const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
       if(code==='cancelled'&&!timedOutNative()){showError('멈췄어요. 다시 짓기를 눌러 주세요.');return}
@@ -1150,7 +1159,7 @@ async function submit(e,opts){
       const rs=fix(sur,d.surname),rg=giv.map((g,i)=>fix(g,d.given&&d.given[i]));
       if(d.note)notes.push(esc(d.note));
       const kn2=kName([rs,...rg].map((x,i)=>x.kr?eumOf(x.kr):[...kn][i]));
-      lastAIError='';setStatus('on');render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});updateShareState();
+      kunFirst(rs.kanji,names);lastAIError='';setStatus('on');render({source:'ai',kname:kn2,sur:rs,giv:rg,names,notes});updateShareState();
       return;
     }catch(err){
       const code=err&&(err.name==='AbortError'?'cancelled':err.code)||'network';
