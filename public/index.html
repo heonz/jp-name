@@ -126,10 +126,6 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .kata-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:14px}
 .kata-row .k-lab{font-size:12px;color:var(--muted)}
 .kata-row b{font-family:var(--f-display);font-size:20px;letter-spacing:.02em}
-.say{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;padding:0}
-.say:hover,.say-btn:hover{border-color:var(--indigo)}
-.say:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
-.say-btn{display:inline-flex;align-items:center;gap:6px}
 @media (max-width:640px){.top .kata-row{justify-content:center}}
 .faq{display:flex;flex-direction:column;gap:8px}
 .faq h2{font-family:var(--f-display);font-size:24px;margin:0 0 4px}
@@ -289,7 +285,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v17</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/surnames/">성씨별 일본어 읽기</a> · <a href="/katakana">가타카나 변환</a> · <a href="/kanji">이름 한자 사전</a> · <a href="/about">음독·훈독이 뭔가요?</a> · <a href="/privacy">개인정보처리방침</a></footer>
+  <footer><span class="ver">v19</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/surnames/">성씨별 일본어 읽기</a> · <a href="/katakana">가타카나 변환</a> · <a href="/kanji">이름 한자 사전</a> · <a href="/about">음독·훈독이 뭔가요?</a> · <a href="/privacy">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -1043,18 +1039,15 @@ function kunFirst(surKanji,names){
   const kun=new Set(e.readings.filter(r=>r.t==='훈').map(r=>r.k));if(!kun.size||kun.has(names[0].sk))return names;
   const i=names.findIndex(n=>kun.has(n.sk));if(i>0){const [x]=names.splice(i,1);names.unshift(x)}return names;
 }
-const SAY_ICON='<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
 // 한국 이름을 일본에서 쓰는 가타카나로 (식당 대기 명단·호텔 체크인용)
 function kataOf(res){if(!res||!/^[가-힣]{2,8}$/.test(res.kname||'')||!window.toKatakana)return '';return toKatakana(res.kname,[...res.sur.kanji].length)}
-// 일본어 음성으로 읽어 주기 (기기에 내장된 음성 사용, 비용 없음)
-function speak(text){
-  if(!('speechSynthesis' in window)){toast('이 브라우저는 음성 읽기를 지원하지 않아요.');return}
-  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.9;
-    const v=speechSynthesis.getVoices().find(v=>/^ja/i.test(v.lang));if(v)u.voice=v;
-    u.onerror=()=>toast('일본어 음성을 재생하지 못했어요. 기기에 일본어 음성이 없을 수 있어요.');
-    speechSynthesis.speak(u)}catch(_){toast('음성을 재생하지 못했어요.')}
+// 카톡·네이버 같은 앱 안 브라우저에서 크롬·사파리로 열기
+function openExternal(){
+  const u=location.href,ua=navigator.userAgent;
+  if(/KAKAOTALK/i.test(ua)){location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(u);return true}
+  if(/Android/i.test(ua)){location.href='intent://'+u.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';return true}
+  return false;
 }
-if('speechSynthesis' in window){try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}catch(_){}}
 const givKanji=(res,n)=>n.gk||res.giv.map(g=>g.kanji);
 function nameView(res,n){
   const sr=conv(n.sk),gr=conv(n.parts.join(''));
@@ -1081,11 +1074,11 @@ function render(res){
       <div class="rank-line">${label}</div>
       <p class="roma">${esc(va.roma)}</p>
       <p class="hangul">${esc(va.hangul)}</p>
-      ${kataOf(res)?`<div class="kata-row"><span class="k-lab">일본에서 쓰는 내 한국 이름</span><b lang="ja">${esc(kataOf(res))}</b><button class="say" type="button" data-say="kata" aria-label="가타카나 이름 듣기" title="듣기">${SAY_ICON}</button></div>`:''}
+      ${kataOf(res)?`<div class="kata-row"><span class="k-lab">일본에서 쓰는 내 한국 이름</span><b lang="ja">${esc(kataOf(res))}</b></div>`:''}
       <div class="chips"><span class="chip">성 <b>${esc(a.sk)}</b> ${esc(a.stype)}</span><span class="chip">이름 <b>${esc(a.parts.join('·'))}</b> ${esc(a.gtype)}</span></div>
       <p class="meaning">${esc(a.meaning)}</p>
       <p class="vibe">${esc(a.vibe)}</p>
-      <div class="acts"><button class="btn small ghost say-btn" type="button" data-say="${sel}">${SAY_ICON}일본어로 듣기</button><button class="btn small kakao" type="button" data-kakao="${sel}" ${kakaoReady?'':'hidden'}>카톡으로 보내기</button><button class="btn small" type="button" data-share="${sel}">공유 카드 만들기</button></div>
+      <div class="acts"><button class="btn small kakao" type="button" data-kakao="${sel}" ${kakaoReady?'':'hidden'}>카톡으로 보내기</button><button class="btn small" type="button" data-share="${sel}">공유 카드 만들기</button></div>
     </div></article>`;
   html+=`<div class="pick-row">${res.names.length>1?'<p class="pick-hint">마음에 드는 이름을 골라서 내 이름으로 정할 수 있어요.</p>':''}</div>`;
   $('#res-main').innerHTML=html;
@@ -1096,7 +1089,7 @@ function render(res){
     <div class="txt"><div class="r1">${esc(v.roma)}<span>${esc(v.hangul)}</span></div>
       <div class="chips"><span class="chip">성 ${esc(n.stype)}</span><span class="chip">이름 ${esc(n.gtype)}</span></div>
       <p class="meaning">${esc(n.meaning)}</p><p class="vibe">${esc(n.vibe)}</p></div>
-    <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost say-btn" type="button" data-say="${i}">${SAY_ICON}듣기</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
+    <div class="act"><button class="btn small" type="button" data-pick="${i}">이 이름으로 할래요</button><button class="btn small ghost" type="button" data-share="${i}">공유 카드</button></div></article>`});
   rest+=`<div class="regen-row"><button class="btn" type="button" data-regen>다른 이름 3개 더 보기</button><a class="btn ghost" href="/" data-home>처음으로</a><span>같은 한자로 다른 읽기를 다시 지어 봐요</span></div>`;
   $('#res-rest').innerHTML=rest;
   adsVisible(true);renderTrip(res);
@@ -1304,7 +1297,7 @@ $('#copy-link').onclick=()=>copyText(shareURL(),'링크를 복사했어요.');
 $('#kakao-btn').onclick=()=>kakaoShare(shareIdx);
 // 카톡 버튼에 손가락·마우스가 닿는 순간 이미지 준비를 시작해서 누를 때 기다리는 시간을 줄임
 $('#results').addEventListener('pointerdown',e=>{const k=e.target.closest('[data-kakao]');if(k)prepareKakaoImage(+k.dataset.kakao)});
-$('#open-ext').onclick=()=>{const u=location.href;if(/KAKAOTALK/i.test(navigator.userAgent))location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(u);else copyText(u,'주소를 복사했어요. 크롬이나 사파리에 붙여넣어 열어 주세요.')};
+$('#open-ext').onclick=()=>{if(!openExternal())copyText(location.href,'주소를 복사했어요. 크롬이나 사파리에 붙여넣어 열어 주세요.')};
 $('#close-btn').onclick=()=>{$('#modal').hidden=true};
 $('#modal').addEventListener('click',e=>{if(e.target.id==='modal')$('#modal').hidden=true});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#modal').hidden=true});
@@ -1480,7 +1473,6 @@ $('#form').addEventListener('click',e=>{const b=e.target.closest('.hfix');if(b){
 $('#results').addEventListener('click',e=>{
   const s=e.target.closest('[data-share]');if(s){openShare(+s.dataset.share);return}
   const k=e.target.closest('[data-kakao]');if(k){kakaoShare(+k.dataset.kakao);return}
-  const sy=e.target.closest('[data-say]');if(sy&&current){if(sy.dataset.say==='kata'){speak(kataOf(current))}else{const n=current.names[+sy.dataset.say];if(n)speak(n.sk+'、'+n.parts.join(''))}return}
   const rg=e.target.closest('[data-regen]');if(rg&&current){if(current.source==='example'){submit(null,{fresh:true});return}fillForm(current);submit(null,{fresh:true,exclude:current.names.map(n=>n.sk+'|'+(n.gk?n.gk.join('')+'|':'')+n.parts.join(''))});return}
   const pk=e.target.closest('[data-pick]');if(pk&&current){current.sel=+pk.dataset.pick;render(current);if(current.source!=='example')updateShareState();$('#res-main').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});return}
   const f=e.target.closest('[data-fix]');if(f){const ids=['f-sur','f-g1','f-g2'];const idx=+f.dataset.fix;$('#'+ids[idx]).value=f.dataset.val;updateHints();submit()}

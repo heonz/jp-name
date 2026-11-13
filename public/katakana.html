@@ -32,7 +32,7 @@
     <input type="search" id="kn" placeholder="예: 이민지" autocomplete="off" maxlength="8" value="이민지">
     <label class="k"><input type="checkbox" id="two"> 성이 두 글자예요 (남궁·제갈 등)</label>
     <div class="out"><b class="j big" lang="ja" id="kout">イ・ミンジ</b>
-      <button type="button" class="pill" id="copy">복사</button><button type="button" class="pill" id="say">듣기</button></div>
+      <button type="button" class="pill" id="copy">복사</button></div>
     <p class="k" id="kmsg">일본에서는 성과 이름 사이에 가운뎃점(・)을 넣거나 한 칸 띄어 써요.</p>
   </div>
   <a class="cta" href="/">한자로 진짜 일본 이름도 지어 보기</a>
@@ -190,7 +190,6 @@ function run(auto){var v=kn.value.replace(/\s/g,'');if(auto)cb.checked=two.index
   msg.textContent='일본에서는 성과 이름 사이에 가운뎃점(・)을 넣거나 한 칸 띄어 써요.';out.textContent=toKatakana(v,cb.checked?2:1)}
 kn.addEventListener('input',function(){run(true)});cb.addEventListener('change',function(){run(false)});
 document.getElementById('copy').onclick=function(){var t=out.textContent;if(!t)return;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){msg.textContent='복사했어요.'},function(){msg.textContent=t})};
-document.getElementById('say').onclick=function(){var t=out.textContent;if(!t||!('speechSynthesis' in window)){msg.textContent='이 브라우저는 음성 읽기를 지원하지 않아요.';return}speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='ja-JP';u.rate=.9;var vs=speechSynthesis.getVoices().filter(function(x){return /^ja/i.test(x.lang)});if(vs[0])u.voice=vs[0];speechSynthesis.speak(u)};
 run(true);})();
 </script>
 </main>

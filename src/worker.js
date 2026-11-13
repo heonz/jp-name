@@ -5,7 +5,7 @@
 import { onRequestPost } from "../functions/api/name.js";
 import { PATHS } from "./sitemap-paths.js";
 
-const VERSION = "v17";
+const VERSION = "v19";
 const json = (b, status = 200) =>
   new Response(JSON.stringify(b, null, 2), {
     status,
