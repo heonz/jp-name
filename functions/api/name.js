@@ -36,11 +36,11 @@ function kana(s) {
     .replace(/[\s・·\.\-_/、,]/g, "");
 }
 
-function part(x) {
+function part(x, maxChars = 1) {
   if (!x || typeof x !== "object") return null;
   const kanji = clean(x.kanji, 2);
   const out = {
-    kanji: HAN.test(kanji) ? [...kanji][0] : "",
+    kanji: HAN.test(kanji) ? [...kanji].filter((c) => HAN.test(c)).slice(0, maxChars).join("") : "",
     kr: clean(x.kr, 12),
     raw: clean(x.raw, 16),
   };
@@ -59,7 +59,7 @@ function buildPrompt(sur, giv, avoid, gender) {
 - 성별: ${gender === "m" ? "남자" : gender === "f" ? "여자" : "정하지 않음"}
 
 규칙
-1. 성은 한자 한 글자를 그대로 유지하고, 일본어로 읽는 방법만 고른다. 글자를 덧붙이거나 바꾸지 마.
+1. 성은 한자(한 글자, 또는 남궁·제갈 같은 두 글자)를 그대로 유지하고, 일본어로 읽는 방법만 고른다. 글자를 덧붙이거나 바꾸지 마. 두 글자 성은 surname_kana에 두 글자 전체의 읽기를 적는다.
    성 읽기 규칙: 성에 훈독(뜻으로 읽는 일본어)이 있으면 1순위 이름의 성은 반드시 훈독으로 읽는다. 음독은 '리', '보쿠'처럼 외국 이름처럼 들려서 재미가 없기 때문이다. 훈독 예: 李→すもも, 朴→ほお, 金→かね, 林→はやし, 河→かわ, 申→さる, 韓→から, 洪→おおみず, 姜→はじかみ, 徐→おもむろ, 柳→やなぎ, 南→みなみ, 高→たか, 白→しろ, 文→ふみ, 孫→まご, 車→くるま, 池→いけ, 石→いし. 2·3순위는 다른 훈독이나 음독을 섞어도 된다. 崔·鄭·趙·宋·裵·曺·劉·盧·禹·閔·蔡처럼 훈독이 없는 성만 음독으로 읽는다.
 2. 이름은 원래 한자를 원래 순서대로 쓰고, 각 글자를 음독·훈독·이름용 읽기(名乗り) 중 하나로 읽는다.
 3. 그 한자에 실제로 있는 읽기만 사용한다. 흔하지 않은 한자라도 음독은 반드시 있으니 음독을 쓰면 된다. 절대 포기하지 말고 항상 3개를 채운다.
@@ -97,7 +97,7 @@ ${nat.fixed.length ? `- 한자가 있는 글자: ${nat.fixed.map((f) => `'${f.sy
 - 성별: ${gender === "m" ? "남자" : gender === "f" ? "여자" : "정하지 않음"}
 
 규칙
-1. 성은 한자 한 글자를 그대로 유지하고, 일본어로 읽는 방법만 고른다.
+1. 성은 한자(한 글자, 또는 남궁·제갈 같은 두 글자)를 그대로 유지하고, 일본어로 읽는 방법만 고른다. 두 글자 성은 surname_kana에 두 글자 전체의 읽기를 적는다.
    성 읽기 규칙: 성에 훈독(뜻으로 읽는 일본어)이 있으면 1순위 이름의 성은 반드시 훈독으로 읽는다. 음독은 '리', '보쿠'처럼 외국 이름처럼 들려서 재미가 없기 때문이다. 훈독 예: 李→すもも, 朴→ほお, 金→かね, 林→はやし, 河→かわ, 申→さる, 韓→から, 洪→おおみず, 姜→はじかみ, 徐→おもむろ, 柳→やなぎ, 南→みなみ, 高→たか, 白→しろ, 文→ふみ, 孫→まご, 車→くるま, 池→いけ, 石→いし. 2·3순위는 다른 훈독이나 음독을 섞어도 된다. 崔·鄭·趙·宋·裵·曺·劉·盧·禹·閔·蔡처럼 훈독이 없는 성만 음독으로 읽는다.
 2. 이름은 순우리말의 뜻을 살려서, 그 뜻을 가진 한자를 골라 실제 일본 사람이 쓰는 자연스러운 이름으로 만든다.
    - 좋은 예: 하늘→空(そら), 나래→翼(つばさ), 샘→泉(いずみ), 보람→実(みのり), 다솜(사랑)→愛(あい), 한별→昴(すばる), 이슬→雫(しずく), 노을→茜(あかね), 바다→海斗(かいと)
@@ -170,7 +170,7 @@ function validateNative(d, fixed) {
     if (names.length === 3) break;
   }
   if (!names.length) return { result: null, why: reasons.join(" ; ") || "empty" };
-  const s = d.surname && HAN.test(d.surname.kanji || "") ? { kanji: [...d.surname.kanji][0], kr: clean(d.surname.kr, 12) } : null;
+  const s = d.surname && HAN.test(d.surname.kanji || "") ? { kanji: [...d.surname.kanji].slice(0, 2).join(""), kr: clean(d.surname.kr, 12) } : null;
   return { result: { surname: s, given: [], names, note: clean(d.note, 80) }, why: reasons.join(" ; ") };
 }
 
@@ -242,10 +242,10 @@ function validate(d, n) {
     if (names.length === 3) break;
   }
   if (!names.length) return { result: null, why: reasons.join(" ; ") || "empty" };
-  const k = (o) => (o && HAN.test(o.kanji || "") ? { kanji: [...o.kanji][0], kr: clean(o.kr, 12) } : null);
+  const k = (o, m = 1) => (o && HAN.test(o.kanji || "") ? { kanji: [...o.kanji].slice(0, m).join(""), kr: clean(o.kr, 12) } : null);
   return {
     result: {
-      surname: k(d.surname),
+      surname: k(d.surname, 2),
       given: Array.isArray(d.given) ? d.given.slice(0, n).map(k) : [],
       names,
       note: clean(d.note, 80),
@@ -266,7 +266,7 @@ export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); } catch (_) { return json({ error: "bad_request" }, 400); }
 
-  const sur = part(body.sur);
+  const sur = part(body.sur, 2); // 성은 두 글자(남궁·황보·제갈 등)까지
   const native = body.mode === "native";
   const nat = native && body.native && typeof body.native === "object"
     ? {
@@ -277,7 +277,7 @@ export async function onRequestPost({ request, env }) {
         .map((f) => ({ syl: clean(f && f.syl, 2), kanji: [...clean(f && f.kanji, 2)][0] || "", kr: clean(f && f.kr, 12) }))
         .filter((f) => HAN.test(f.kanji)),
     } : null;
-  const giv = native ? [] : (Array.isArray(body.giv) ? body.giv : []).slice(0, 2).map(part).filter(Boolean);
+  const giv = native ? [] : (Array.isArray(body.giv) ? body.giv : []).slice(0, 2).map((x) => part(x)).filter(Boolean);
   if (!sur) return json({ error: "bad_request" }, 400);
   if (native ? !(nat && HANGUL_NAME.test(nat.name)) : !giv.length) return json({ error: "bad_request" }, 400);
   const n = giv.length;
