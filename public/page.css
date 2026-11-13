@@ -1,0 +1,58 @@
+/* 일본 이름 작명소 · 안내 페이지 공용 스타일 */
+:root{
+  --paper:#EFF0EB; --surface:#FBFBF8; --ink:#1D2333; --muted:#5B6272; --line:#D5D7CF;
+  --wood:#E4CBA0; --wood-2:#D2B282; --wood-ink:#2B1F12; --wood-edge:#B8945F; --shu:#C3362B; --indigo:#2F4A7A; --chip:#E4E6EE;
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme: dark){:root{
+  --paper:#14161B; --surface:#1C1F26; --ink:#E8E6DF; --muted:#9BA1AD; --line:#2C3039;
+  --wood:#D6B987; --wood-2:#C29E6A; --wood-ink:#24190D; --wood-edge:#9C7A47; --shu:#E2564A; --indigo:#8FA9DA; --chip:#2A2F3A; color-scheme:dark}}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 var(--f-body);word-break:keep-all;overflow-wrap:break-word}
+.wrap{max-width:860px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:var(--indigo)}
+.top{border-bottom:1px solid var(--line);background:var(--surface)}
+.bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding-block:12px}
+.brand{font:800 18px var(--f-display);color:var(--ink);text-decoration:none}
+nav{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
+nav a{color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--ink);text-decoration:underline}
+main{padding-block:28px 48px;display:flex;flex-direction:column;gap:28px}
+.crumb{font-size:13px;color:var(--muted)}
+.crumb a{color:var(--muted)}
+h1{font:800 clamp(28px,5vw,40px)/1.2 var(--f-display);margin:0;text-wrap:balance}
+h1 .ja{color:var(--shu)}
+h2{font:700 22px/1.3 var(--f-display);margin:0 0 10px}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch}
+section{display:flex;flex-direction:column;gap:12px}
+.hero{display:grid;grid-template-columns:auto minmax(0,1fr);gap:24px;align-items:center}
+.plate{background:linear-gradient(180deg,var(--wood),var(--wood-2));border:1px solid var(--wood-edge);border-radius:5px;box-shadow:0 6px 18px rgba(30,20,10,.18);padding:18px 16px;min-width:84px;display:flex;justify-content:center}
+.v{writing-mode:vertical-rl;font:800 64px/1.15 var(--f-display);color:var(--wood-ink)}
+.v rt{font-size:15px;font-weight:700}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--paper)}
+.j{font-family:var(--f-display);font-size:18px;font-weight:700}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:99px;background:var(--chip);color:var(--muted)}
+.tag.kun{background:var(--indigo);color:var(--paper)}
+.ex{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+.ex div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ex .k{font-size:13px;color:var(--muted)}
+.ex .n{font:700 20px var(--f-display)}
+.ex .r{font-size:14px}
+.cta{display:inline-flex;align-self:flex-start;font:600 15px var(--f-body);background:var(--ink);color:var(--paper);text-decoration:none;border-radius:6px;padding:12px 18px}
+.cta:hover{filter:brightness(1.12)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips a{font-size:14px;text-decoration:none;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:4px 10px}
+.chips a:hover{border-color:var(--indigo)}
+.k{color:var(--muted);font-size:13px}
+.note{font-size:14px;background:var(--surface);border:1px dashed var(--line);border-radius:8px;padding:12px 14px}
+input[type=search]{font:16px var(--f-body);color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;max-width:360px;box-sizing:border-box}
+.foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-block:16px 32px}
+.foot a{color:inherit}
+a:focus-visible,input:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+@media (max-width:560px){.hero{grid-template-columns:1fr;justify-items:start}.v{font-size:52px}}

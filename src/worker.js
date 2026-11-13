@@ -3,8 +3,9 @@
 // /api/health : AI 연결 진단 (브라우저로 열어서 확인)
 // 나머지 주소 : public 폴더의 파일
 import { onRequestPost } from "../functions/api/name.js";
+import { PATHS } from "./sitemap-paths.js";
 
-const VERSION = "v15";
+const VERSION = "v16";
 const json = (b, status = 200) =>
   new Response(JSON.stringify(b, null, 2), {
     status,
@@ -55,6 +56,22 @@ export default {
       if (request.method === "POST") return onRequestPost({ request, env, ctx });
       return json({ error: "method_not_allowed" }, 405);
     }
-    return env.ASSETS.fetch(request);
+    // 검색엔진용: 주소(도메인)에 맞춰 robots.txt 와 sitemap.xml 을 만들어 줌
+    if (url.pathname === "/robots.txt") {
+      return new Response(`User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${url.origin}/sitemap.xml\n`,
+        { headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "public, max-age=3600" } });
+    }
+    if (url.pathname === "/sitemap.xml") {
+      const today = new Date().toISOString().slice(0, 10);
+      const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+        PATHS.map((p) => `  <url><loc>${url.origin}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n") + `\n</urlset>\n`;
+      return new Response(body, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
+    }
+    const res = await env.ASSETS.fetch(request);
+    if (res.status === 404) {
+      const nf = await env.ASSETS.fetch(new Request(url.origin + "/404"));
+      return new Response(nf.body, { status: 404, headers: nf.headers });
+    }
+    return res;
   },
 };

@@ -3,8 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>일본 이름 작명소 · 내 이름 한자로 짓는 일본 이름</title>
-<meta name="description" content="내 이름 한자를 일본식으로 읽으면? 성은 그대로, 이름은 음독·훈독으로 지은 일본 이름 3가지를 추천해 드려요.">
+<title>일본 이름 짓기 · 내 이름 일본어로 바꾸면? | 일본 이름 작명소</title>
+<meta name="description" content="내 이름 한자를 일본어 훈독·음독으로 읽어 일본식 이름 3가지를 지어 드려요. 순우리말 이름도 돼요. 김씨는 카네, 이씨는 스모모! 성씨별 일본어 읽기와 이름 한자 사전도 있어요.">
+<link rel="canonical" href="/">
+<meta property="og:site_name" content="일본 이름 작명소">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"일본 이름 작명소","applicationCategory":"EntertainmentApplication","operatingSystem":"Any","inLanguage":"ko","description":"한국 이름의 한자를 일본어 훈독·음독으로 읽어 일본식 이름을 지어 주는 재미용 작명 사이트","offers":{"@type":"Offer","price":"0","priceCurrency":"KRW"}}</script>
 <meta property="og:type" content="website">
 <meta property="og:title" content="내 이름, 일본에선 뭐라고 읽을까?">
 <meta property="og:description" content="내 이름 한자로 짓는 일본 이름. 홍길동 → 오미즈 요시토모">
@@ -120,6 +123,13 @@ form{background:var(--surface);border:1px solid var(--line);border-radius:10px;p
 .runner .r1 span{color:var(--muted);font-weight:500;margin-left:6px}
 .runner .meaning,.runner .vibe{font-size:13px}
 .pick-hint{margin:0;font-size:13px;color:var(--muted)}
+.faq{display:flex;flex-direction:column;gap:8px}
+.faq h2{font-family:var(--f-display);font-size:24px;margin:0 0 4px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+.faq summary{font-weight:600;cursor:pointer}
+.faq summary:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.faq p{margin:8px 0 0;color:var(--muted)}
+.faq a{color:var(--indigo)}
 .pick-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
 .regen-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
 .regen-row span{font-size:13px;color:var(--muted)}
@@ -257,10 +267,20 @@ footer .ver{opacity:.6}
 
 
 
+  <section class="faq" aria-labelledby="faq-h">
+    <h2 id="faq-h">자주 묻는 질문</h2>
+    <details><summary>일본 이름은 어떻게 지어지나요?</summary><p>성은 한국 한자를 그대로 두고 일본어로 읽는 법만 바꿔요. 李는 '자두'라는 뜻의 훈독 스모모(すもも), 金은 카네(かね)처럼요. 이름은 한자마다 음독·훈독·이름용 읽기(나노리)를 섞어서 실제 일본 이름처럼 들리는 조합 세 가지를 골라요.</p></details>
+    <details><summary>음독과 훈독은 뭐가 다른가요?</summary><p>음독은 옛 중국 발음에서 온 읽기(李 → 리), 훈독은 한자의 뜻을 일본 고유어로 읽는 법(李 → 스모모)이에요. 훈독이 더 일본 이름답게 들려서 먼저 써요. <a href="/about">음독·훈독 자세히 보기</a></p></details>
+    <details><summary>이름이 순우리말이라 한자가 없어요.</summary><p>위에서 '순우리말 이름'을 고르면 이름의 뜻을 살려 한자로 옮겨요. 하늘은 空(소라), 샘은 泉(이즈미)처럼요. 은샘처럼 한 글자만 순우리말이면 그 칸에만 '순우리말'을 체크하세요.</p></details>
+    <details><summary>내 이름 한자를 몰라요.</summary><p>음만 적어도 가장 흔한 한자로 골라 드리고, 다른 후보도 보여 드려요. <a href="/kanji">이름 한자 사전</a>에서 훈음으로 찾아볼 수도 있어요.</p></details>
+    <details><summary>우리 성씨는 일본어로 뭐라고 읽나요?</summary><p>한국 성씨 73개의 일본어 읽기와 뜻을 <a href="/surnames/">성씨별 일본어 읽기</a>에 정리해 뒀어요.</p></details>
+    <details><summary>진짜 일본에서 쓸 수 있는 이름인가요?</summary><p>실제 일본 이름에 쓰는 읽기를 고르지만, 재미로 지은 이름이라 실제로 쓰이는 이름인지는 보장하지 않아요.</p></details>
+  </section>
+
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v15</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/about.html">음독·훈독이 뭔가요?</a> · <a href="/privacy.html">개인정보처리방침</a></footer>
+  <footer><span class="ver">v16</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/surnames/">성씨별 일본어 읽기</a> · <a href="/kanji">이름 한자 사전</a> · <a href="/about">음독·훈독이 뭔가요?</a> · <a href="/privacy">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -1442,6 +1462,7 @@ function fillForm(res){$('#f-sur').value=res.sur.kanji;
 setStatus('on');
 (async()=>{const p=new URLSearchParams(location.search);const sk=p.get('s'),gk=p.get('g'),r=p.get('r');
   if(r){const res=await unpackResult(r);if(res){fillForm(res);render(res);updateShareState();return}}
+  if(sk&&!gk&&HAN.test(sk)){$('#m-han').checked=true;applyMode();$('#f-sur').value=[...sk][0];$('#f-g1').value='';$('#f-g2').value='';updateHints();$('#f-g1').focus({preventScroll:true});return}
   if(sk&&gk&&HAN.test(sk)){const gs=[...gk].filter(c=>HAN.test(c)).slice(0,2);$('#f-sur').value=[...sk][0];$('#f-g1').value=gs[0]||'';$('#f-g2').value=gs[1]||'';updateHints();submit()}})();
 </script>
 
