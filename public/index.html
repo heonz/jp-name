@@ -305,7 +305,7 @@ footer .ver{opacity:.6}
   <!-- 광고 자리 B: 페이지 하단 -->
   <aside class="ad-slot" id="ad-bottom" data-slot="bottom" hidden><span class="ad-label">광고</span><div class="ad-box"></div></aside>
 
-  <footer><span class="ver">v22</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/guide/">읽을거리</a> · <a href="/surnames/">성씨별 일본어 읽기</a> · <a href="/katakana">가타카나 변환</a> · <a href="/kanji">이름 한자 사전</a> · <a href="/about">음독·훈독이 뭔가요?</a> · <a href="/intro">사이트 소개</a> · <a href="/contact">문의하기</a> · <a href="/privacy">개인정보처리방침</a></footer>
+  <footer><span class="ver">v23</span> 한자 읽기는 일본 한자 사전(음독·훈독·이름용 읽기) 기준으로 고르지만, 실제 일본에서 쓰는 이름인지는 보장하지 않아요. 재미로만 봐 주세요. 입력한 이름은 저장하지 않아요. <a href="/guide/">읽을거리</a> · <a href="/surnames/">성씨별 일본어 읽기</a> · <a href="/katakana">가타카나 변환</a> · <a href="/kanji">이름 한자 사전</a> · <a href="/about">음독·훈독이 뭔가요?</a> · <a href="/intro">사이트 소개</a> · <a href="/contact">문의하기</a> · <a href="/privacy">개인정보처리방침</a></footer>
 </div>
 
 <div class="modal" id="modal" hidden>
@@ -1505,7 +1505,8 @@ document.querySelectorAll('input[name="nmode"]').forEach(r=>r.addEventListener('
 document.querySelectorAll('[data-ex]').forEach(b=>b.onclick=()=>{$('#m-han').checked=true;$('#n-g1').checked=false;$('#n-g2').checked=false;applyNatFlags();applyMode();const [a,c,d]=b.dataset.ex.split('|');$('#f-sur').value=a;$('#f-g1').value=c;$('#f-g2').value=d;updateHints();submit()});
 $('#dl-sur').innerHTML=SUR.map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
 $('#dl-giv').innerHTML=GIV.filter(d=>d.c===d.jp||!GIV.some(o=>o!==d&&o.c===d.jp)).map(d=>`<option value="${esc(d.kr)}">${esc(d.jp)}</option>`).join('');
-try{const last=JSON.parse(localStorage.getItem('jpname-last')||'null');if(Array.isArray(last)&&last[0]){$('#f-sur').value=last[0];$('#f-g1').value=last[1]||'';$('#f-g2').value=last[2]||'';const gr=document.querySelector(`input[name="gender"][value="${last[3]||''}"]`);if(gr)gr.checked=true;if(last[4]==='native'){$('#m-native').checked=true;$('#f-native').value=last[5]||'';$('#f-mean').value=last[6]||''}if(Array.isArray(last[7])){$('#n-g1').checked=!!last[7][0];$('#n-g2').checked=!!last[7][1];applyNatFlags()}applyMode()}}catch(_){}
+/* 처음 열 때는 입력칸을 항상 비워 둬요 (예전 입력·친구 이름이 남지 않게) */
+try{localStorage.removeItem('jpname-last')}catch(_){}
 initAds();
 render(EXAMPLE);updateHints();
 
