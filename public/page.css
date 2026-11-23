@@ -14,7 +14,15 @@ body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.7 var(--f-bod
 a{color:var(--indigo)}
 .top{border-bottom:1px solid var(--line);background:var(--surface)}
 .bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding-block:12px}
-.brand{font:800 18px var(--f-display);color:var(--ink);text-decoration:none}
+.logo{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink)}
+.logo-i{width:28px;height:37px;flex:none}
+.logo-t{display:flex;flex-direction:column;line-height:1.2}
+.logo-t b{font-weight:700;font-size:18px;letter-spacing:-.01em}
+.logo-t i{font-style:normal;color:var(--shu)}
+.logo-t small{font-size:11px;color:var(--muted)}
+.logo-t small span{font-family:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;font-weight:700}
+.logo:hover b{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+
 nav{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:14px}
 nav a{color:var(--muted);text-decoration:none}
 nav a:hover{color:var(--ink);text-decoration:underline}
